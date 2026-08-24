@@ -1,6 +1,7 @@
 package com.placement.controller;
 
 import com.placement.dto.ApplicationRequest;
+import com.placement.dto.ApplicationResponse;
 import com.placement.entity.Application;
 import com.placement.service.ApplicationService;
 import org.springframework.http.ResponseEntity;
@@ -24,14 +25,36 @@ public class ApplicationController {
     }
 
     @GetMapping
-    public List<Application> getAllApplications() {
-        return applicationService.getAllApplications();
+    public List<ApplicationResponse> getAllApplications() {
+
+        return applicationService.getAllApplications()
+                .stream()
+                .map(application -> new ApplicationResponse(
+                        application.getId(),
+                        application.getApplicationDate(),
+                        application.getStatus(),
+                        application.getStudent().getId(),
+                        application.getStudent().getName(),
+                        application.getCompany().getId(),
+                        application.getCompany().getName()
+                ))
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Application> getApplicationById(@PathVariable Long id) {
+    public ResponseEntity<ApplicationResponse> getApplicationById(
+            @PathVariable Long id) {
 
         return applicationService.getApplicationById(id)
+                .map(application -> new ApplicationResponse(
+                        application.getId(),
+                        application.getApplicationDate(),
+                        application.getStatus(),
+                        application.getStudent().getId(),
+                        application.getStudent().getName(),
+                        application.getCompany().getId(),
+                        application.getCompany().getName()
+                ))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
