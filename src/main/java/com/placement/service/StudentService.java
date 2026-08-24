@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 
 import com.placement.entity.Student;
 import com.placement.repository.StudentRepository;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -40,6 +39,8 @@ public class StudentService {
 //        existingStudent.setCollege(student.getCollege());
         existingStudent.setBranch(student.getBranch());
         existingStudent.setCgpa(student.getCgpa());
+        existingStudent.setPhone(student.getPhone());
+        existingStudent.setGraduationYear(student.getGraduationYear());
 
         return studentRepository.save(existingStudent);
     }
