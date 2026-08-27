@@ -70,6 +70,28 @@ public class JobController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/company/{companyId}")
+    public ResponseEntity<List<JobResponse>> getJobsByCompany(
+            @PathVariable Long companyId) {
+
+        List<JobResponse> response = jobService.getJobsByCompanyId(companyId)
+                .stream()
+                .map(job -> new JobResponse(
+                        job.getId(),
+                        job.getTitle(),
+                        job.getDescription(),
+                        job.getLocation(),
+                        job.getSalary(),
+                        job.getMinimumCgpa(),
+                        job.getJobType(),
+                        job.getCompany().getId(),
+                        job.getCompany().getName()
+                ))
+                .toList();
+
+        return ResponseEntity.ok(response);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<Job> updateJob(
             @PathVariable Long id,

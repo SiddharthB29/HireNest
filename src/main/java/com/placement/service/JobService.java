@@ -44,6 +44,10 @@ public class JobService {
                         new RuntimeException("Job not found"));
     }
 
+    public List<Job> getJobsByCompanyId(Long companyId) {
+        return jobRepository.findByCompanyId(companyId);
+    }
+
     public Job updateJob(Long id, Job updatedJob) {
 
         Job existingJob = jobRepository.findById(id)
