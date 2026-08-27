@@ -35,8 +35,10 @@ public class ApplicationController {
                         application.getStatus(),
                         application.getStudent().getId(),
                         application.getStudent().getName(),
-                        application.getCompany().getId(),
-                        application.getCompany().getName()
+                        application.getJob().getId(),
+                        application.getJob().getTitle(),
+                        application.getJob().getCompany().getId(),
+                        application.getJob().getCompany().getName()
                 ))
                 .toList();
     }
@@ -52,8 +54,10 @@ public class ApplicationController {
                         application.getStatus(),
                         application.getStudent().getId(),
                         application.getStudent().getName(),
-                        application.getCompany().getId(),
-                        application.getCompany().getName()
+                        application.getJob().getId(),
+                        application.getJob().getTitle(),
+                        application.getJob().getCompany().getId(),
+                        application.getJob().getCompany().getName()
                 ))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

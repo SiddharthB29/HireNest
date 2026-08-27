@@ -13,6 +13,9 @@ public class ApplicationResponse {
     private Long studentId;
     private String studentName;
 
+    private Long jobId;
+    private String jobTitle;
+
     private Long companyId;
     private String companyName;
 
@@ -25,6 +28,8 @@ public class ApplicationResponse {
             ApplicationStatus status,
             Long studentId,
             String studentName,
+            Long jobId,
+            String jobTitle,
             Long companyId,
             String companyName) {
 
@@ -33,6 +38,8 @@ public class ApplicationResponse {
         this.status = status;
         this.studentId = studentId;
         this.studentName = studentName;
+        this.jobId = jobId;
+        this.jobTitle = jobTitle;
         this.companyId = companyId;
         this.companyName = companyName;
     }
@@ -63,5 +70,13 @@ public class ApplicationResponse {
 
     public String getCompanyName() {
         return companyName;
+    }
+
+    public Long getJobId() {
+        return jobId;
+    }
+
+    public String getJobTitle() {
+        return jobTitle;
     }
 }

@@ -1,5 +1,6 @@
 package com.placement.entity;
 
+import com.placement.entity.Job;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
@@ -16,8 +17,8 @@ public class Application {
     private Student student;
 
     @ManyToOne
-    @JoinColumn(name = "company_id", nullable = false)
-    private Company company;
+    @JoinColumn(name = "job_id", nullable = false)
+    private Job job;
 
     private LocalDate applicationDate;
 
@@ -43,12 +44,12 @@ public class Application {
         this.student = student;
     }
 
-    public Company getCompany() {
-        return company;
+    public Job getJob() {
+        return job;
     }
 
-    public void setCompany(Company company) {
-        this.company = company;
+    public void setJob(Job job) {
+        this.job = job;
     }
 
     public LocalDate getApplicationDate() {

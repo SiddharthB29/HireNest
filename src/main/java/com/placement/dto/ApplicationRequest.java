@@ -7,7 +7,7 @@ import java.time.LocalDate;
 public class ApplicationRequest {
 
     private Long studentId;
-    private Long companyId;
+    private Long jobId;
     private LocalDate applicationDate;
     private ApplicationStatus status;
 
@@ -19,12 +19,12 @@ public class ApplicationRequest {
         this.studentId = studentId;
     }
 
-    public Long getCompanyId() {
-        return companyId;
+    public Long getJobId() {
+        return jobId;
     }
 
-    public void setCompanyId(Long companyId) {
-        this.companyId = companyId;
+    public void setJobId(Long jobId) {
+        this.jobId = jobId;
     }
 
     public LocalDate getApplicationDate() {
