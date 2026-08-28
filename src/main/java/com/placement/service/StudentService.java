@@ -1,5 +1,6 @@
 package com.placement.service;
 
+import com.placement.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.placement.entity.Student;
@@ -26,13 +27,13 @@ public class StudentService {
 
     public Student getStudentById(Long id) {
         return studentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found with id " + id));
     }
 
     public Student updateStudent(Long id, Student student) {
 
         Student existingStudent = studentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found with id " + id));
 
         existingStudent.setName(student.getName());
         existingStudent.setEmail(student.getEmail());
@@ -48,7 +49,7 @@ public class StudentService {
     public void deleteStudent(Long id) {
 
         if (!studentRepository.existsById(id)) {
-            throw new RuntimeException("Student not found");
+            throw new ResourceNotFoundException("Student not found");
         }
 
         studentRepository.deleteById(id);

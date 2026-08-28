@@ -5,6 +5,8 @@ import com.placement.entity.Application;
 import com.placement.entity.ApplicationStatus;
 import com.placement.entity.Job;
 import com.placement.entity.Student;
+import com.placement.exception.DuplicateApplicationException;
+import com.placement.exception.ResourceNotFoundException;
 import com.placement.repository.ApplicationRepository;
 import com.placement.repository.JobRepository;
 import com.placement.repository.StudentRepository;
@@ -30,16 +32,16 @@ public class ApplicationService {
 
     public Application createApplication(ApplicationRequest request) {
         Student student = studentRepository.findById(request.getStudentId())
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found with id " + request.getStudentId()));
         Job job = jobRepository.findById(request.getJobId())
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found with id " + request.getJobId()));
         Application application = new Application();
 
         if (applicationRepository.existsByStudentIdAndJobId(
                 request.getStudentId(),
                 request.getJobId())) {
 
-            throw new RuntimeException(
+            throw new DuplicateApplicationException(
                     "Student has already applied to this job"
             );
         }
@@ -63,11 +65,11 @@ public class ApplicationService {
     public Application updateApplication(Long id, ApplicationRequest request) {
 
         Application application = applicationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Application not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Application not found with id " + id));
         Student student = studentRepository.findById(request.getStudentId())
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found with id " + request.getStudentId()));
         Job job = jobRepository.findById(request.getJobId())
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found with id " + request.getJobId()));
 
         application.setStudent(student);
         application.setJob(job);
@@ -82,7 +84,7 @@ public class ApplicationService {
             ApplicationStatus newStatus) {
 
         Application application = applicationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Application not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Application not found with id " + id));
 
         ApplicationStatus currentStatus = application.getStatus();
 

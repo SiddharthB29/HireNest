@@ -1,6 +1,7 @@
 package com.placement.service;
 
 import com.placement.entity.Company;
+import com.placement.exception.ResourceNotFoundException;
 import com.placement.repository.CompanyRepository;
 import org.springframework.stereotype.Service;
 
@@ -25,13 +26,13 @@ public class CompanyService {
 
     public Company getCompanyById(Long id) {
         return companyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Company not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Company not found with id " + id));
     }
 
     public Company updateCompany(Long id, Company company) {
 
         Company existingCompany = companyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Company not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Company not found with id " + id));
 
         existingCompany.setName(company.getName());
         existingCompany.setDescription(company.getDescription());
@@ -44,7 +45,7 @@ public class CompanyService {
     public void deleteCompany(Long id) {
 
         if (!companyRepository.existsById(id)) {
-            throw new RuntimeException("Company not found");
+            throw new ResourceNotFoundException("Company not found with id " + id);
         }
 
         companyRepository.deleteById(id);

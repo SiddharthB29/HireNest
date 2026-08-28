@@ -2,6 +2,7 @@ package com.placement.service;
 
 import com.placement.entity.Company;
 import com.placement.entity.Job;
+import com.placement.exception.ResourceNotFoundException;
 import com.placement.repository.CompanyRepository;
 import com.placement.repository.JobRepository;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,7 @@ public class JobService {
 
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() ->
-                        new RuntimeException("Company not found"));
+                        new ResourceNotFoundException("Company not found with id " + companyId));
 
         job.setCompany(company);
 
@@ -41,7 +42,7 @@ public class JobService {
 
         return jobRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Job not found"));
+                        new ResourceNotFoundException("Job not found with id" + id));
     }
 
     public List<Job> getJobsByCompanyId(Long companyId) {
@@ -52,7 +53,7 @@ public class JobService {
 
         Job existingJob = jobRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Job not found"));
+                        new ResourceNotFoundException("Job not found with id " + id));
 
         existingJob.setTitle(updatedJob.getTitle());
         existingJob.setDescription(updatedJob.getDescription());
@@ -67,7 +68,7 @@ public class JobService {
     public void deleteJob(Long id) {
 
         if (!jobRepository.existsById(id)) {
-            throw new RuntimeException("Job not found");
+            throw new ResourceNotFoundException("Job not found with id " + id);
         }
 
         jobRepository.deleteById(id);
