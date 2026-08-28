@@ -2,6 +2,7 @@ package com.placement.controller;
 
 import com.placement.dto.ApplicationRequest;
 import com.placement.dto.ApplicationResponse;
+import com.placement.dto.ApplicationStatusRequest;
 import com.placement.entity.Application;
 import com.placement.service.ApplicationService;
 import org.springframework.http.ResponseEntity;
@@ -74,6 +75,23 @@ public class ApplicationController {
             );
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Application> updateApplicationStatus(
+            @PathVariable Long id,
+            @RequestBody ApplicationStatusRequest request) {
+
+        try {
+            return ResponseEntity.ok(
+                    applicationService.updateApplicationStatus(
+                            id,
+                            request.getStatus()
+                    )
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 
