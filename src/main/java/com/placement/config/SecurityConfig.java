@@ -62,6 +62,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/applications/**")
                         .hasAnyRole("STUDENT", "RECRUITER", "ADMIN")
 
+                        .requestMatchers(HttpMethod.PUT, "/api/applications/**")
+                        .hasAnyRole("RECRUITER", "ADMIN")
+
+                        .requestMatchers(HttpMethod.PATCH, "/api/applications/*/status")
+                        .hasAnyRole("RECRUITER", "ADMIN")
+
                         .requestMatchers(HttpMethod.POST, "/api/jobs/**")
                         .hasAnyRole("RECRUITER", "ADMIN")
 
@@ -72,13 +78,25 @@ public class SecurityConfig {
                         .hasAnyRole("RECRUITER", "ADMIN")
 
                         .requestMatchers(HttpMethod.POST, "/api/companies/**")
-                        .hasAnyRole("RECRUITER", "ADMIN")
+                        .hasAnyRole("ADMIN")
 
                         .requestMatchers(HttpMethod.PUT, "/api/companies/**")
                         .hasAnyRole("RECRUITER", "ADMIN")
 
                         .requestMatchers(HttpMethod.DELETE, "/api/companies/**")
-                        .hasAnyRole("RECRUITER", "ADMIN")
+                        .hasAnyRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/students/**")
+                        .hasAnyRole("STUDENT", "RECRUITER", "ADMIN")
+
+                        .requestMatchers(HttpMethod.POST, "/api/students/**")
+                        .hasRole("STUDENT")
+
+                        .requestMatchers(HttpMethod.PUT, "/api/students/**")
+                        .hasAnyRole("STUDENT", "ADMIN")
+
+                        .requestMatchers(HttpMethod.DELETE, "/api/students/**")
+                        .hasAnyRole("STUDENT", "ADMIN")
 
                         .anyRequest().authenticated()
                 )

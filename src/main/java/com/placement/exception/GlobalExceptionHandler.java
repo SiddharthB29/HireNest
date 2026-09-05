@@ -29,9 +29,9 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(DuplicateApplicationException.class)
+    @ExceptionHandler(ConflictException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateApplication(
-            DuplicateApplicationException ex) {
+            ConflictException ex) {
 
         ErrorResponse errorResponse =
                 new ErrorResponse(

@@ -69,13 +69,9 @@ public class ApplicationController {
             @PathVariable Long id,
             @RequestBody ApplicationRequest request) {
 
-        try {
-            return ResponseEntity.ok(
-                    applicationService.updateApplication(id, request)
-            );
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(
+                applicationService.updateApplication(id, request)
+        );
     }
 
     @PatchMapping("/{id}/status")
@@ -83,16 +79,12 @@ public class ApplicationController {
             @PathVariable Long id,
             @RequestBody ApplicationStatusRequest request) {
 
-        try {
-            return ResponseEntity.ok(
-                    applicationService.updateApplicationStatus(
-                            id,
-                            request.getStatus()
-                    )
-            );
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        return ResponseEntity.ok(
+                applicationService.updateApplicationStatus(
+                        id,
+                        request.getStatus()
+                )
+        );
     }
 
     @DeleteMapping("/{id}")

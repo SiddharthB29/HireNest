@@ -19,6 +19,14 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
+
+    @OneToOne
+    @JoinColumn(name = "student_id", unique = true)
+    private Student student;
+
     public User() {
     }
 
@@ -54,5 +62,21 @@ public class User {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public Company getCompany() {
+        return company;
+    }
+
+    public void setCompany(Company company) {
+        this.company = company;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
     }
 }

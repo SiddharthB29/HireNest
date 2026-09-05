@@ -6,6 +6,7 @@ public class RegisterRequest {
     private String userName;
     private String password;
     private Role role;
+    private Long companyId;
 
     public RegisterRequest() {
     }
@@ -31,5 +32,13 @@ public class RegisterRequest {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public Long getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
     }
 }
