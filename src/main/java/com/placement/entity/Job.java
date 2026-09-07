@@ -2,6 +2,8 @@ package com.placement.entity;
 
 import jakarta.persistence.*;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "jobs")
 public class Job {
@@ -19,6 +21,11 @@ public class Job {
     private Double salary;
 
     private Double minimumCgpa;
+
+    private Integer maximumBacklogs;
+
+    @ElementCollection
+    private Set<String> requiredSkills;
 
     private String jobType;
 
@@ -71,6 +78,22 @@ public class Job {
 
     public void setMinimumCgpa(Double minimumCgpa) {
         this.minimumCgpa = minimumCgpa;
+    }
+
+    public Integer getMaximumBacklogs() {
+        return maximumBacklogs;
+    }
+
+    public void setMaximumBacklogs(Integer maximumBacklogs) {
+        this.maximumBacklogs = maximumBacklogs;
+    }
+
+    public Set<String> getRequiredSkills() {
+        return requiredSkills;
+    }
+
+    public void setRequiredSkills(Set<String> requiredSkills) {
+        this.requiredSkills = requiredSkills;
     }
 
     public String getJobType() {

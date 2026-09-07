@@ -2,6 +2,8 @@ package com.placement.entity;
 
 import jakarta.persistence.*;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "students")
 public class Student {
@@ -19,6 +21,11 @@ public class Student {
     private String branch;
 
     private Double cgpa;
+
+    private Integer backlogs;
+
+    @ElementCollection
+    private Set<String> skills;
 
     private Integer graduationYear;
 
@@ -68,6 +75,22 @@ public class Student {
 
     public void setCgpa(Double cgpa) {
         this.cgpa = cgpa;
+    }
+
+    public Integer getBacklogs() {
+        return backlogs;
+    }
+
+    public void setBacklogs(Integer backlogs) {
+        this.backlogs = backlogs;
+    }
+
+    public Set<String> getSkills() {
+        return skills;
+    }
+
+    public void setSkills(Set<String> skills) {
+        this.skills = skills;
     }
 
     public Integer getGraduationYear() {
