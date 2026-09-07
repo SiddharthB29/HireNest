@@ -1,5 +1,6 @@
 package com.placement.controller;
 
+import com.placement.dto.AdminRecruiterRequest;
 import com.placement.dto.AuthResponse;
 import com.placement.dto.LoginRequest;
 import com.placement.dto.RegisterRequest;
@@ -39,5 +40,20 @@ public class AuthController {
         String token = authService.login(request);
 
         return ResponseEntity.ok(token);
+    }
+
+    @PostMapping("/admin/recruiters")
+    public ResponseEntity<AuthResponse> createRecruiter(
+            @RequestBody AdminRecruiterRequest request) {
+
+        User user = authService.createRecruiter(request);
+
+        AuthResponse response = new AuthResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getRole()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
