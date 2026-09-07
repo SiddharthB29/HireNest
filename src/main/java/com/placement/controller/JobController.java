@@ -1,7 +1,13 @@
 package com.placement.controller;
 
 import com.placement.entity.Job;
+import com.placement.entity.Student;
+import com.placement.exception.ResourceNotFoundException;
+import com.placement.repository.JobRepository;
+import com.placement.repository.StudentRepository;
+import com.placement.service.EligibilityResult;
 import com.placement.service.JobService;
+import com.placement.service.PlacementEngine;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.placement.dto.JobResponse;
@@ -13,9 +19,18 @@ import java.util.List;
 public class JobController {
 
     private final JobService jobService;
+    private final JobRepository jobRepository;
+    private final StudentRepository studentRepository;
+    private final PlacementEngine placementEngine;
 
-    public JobController(JobService jobService) {
+    public JobController(JobService jobService,
+                         JobRepository jobRepository,
+                         StudentRepository studentRepository,
+                         PlacementEngine placementEngine) {
         this.jobService = jobService;
+        this.jobRepository = jobRepository;
+        this.studentRepository = studentRepository;
+        this.placementEngine = placementEngine;
     }
 
     @PostMapping("/company/{companyId}")
@@ -90,6 +105,20 @@ public class JobController {
                 .toList();
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{jobId}/eligibility/{studentId}")
+    public EligibilityResult checkEligibility(
+            @PathVariable Long jobId,
+            @PathVariable Long studentId) {
+
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
+
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+
+        return placementEngine.evaluate(student, job);
     }
 
     @PutMapping("/{id}")
