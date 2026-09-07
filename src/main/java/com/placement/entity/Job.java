@@ -27,6 +27,11 @@ public class Job {
     @ElementCollection
     private Set<String> requiredSkills;
 
+    @ElementCollection
+    private Set<String> allowedBranches;
+
+    private Integer graduationYear;
+
     private String jobType;
 
     @ManyToOne
@@ -94,6 +99,22 @@ public class Job {
 
     public void setRequiredSkills(Set<String> requiredSkills) {
         this.requiredSkills = requiredSkills;
+    }
+
+    public Set<String> getAllowedBranches() {
+        return allowedBranches;
+    }
+
+    public void setAllowedBranches(Set<String> allowedBranches) {
+        this.allowedBranches = allowedBranches;
+    }
+
+    public Integer getGraduationYear() {
+        return graduationYear;
+    }
+
+    public void setGraduationYear(Integer graduationYear) {
+        this.graduationYear = graduationYear;
     }
 
     public String getJobType() {

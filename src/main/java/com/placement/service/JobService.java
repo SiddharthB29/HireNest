@@ -134,6 +134,8 @@ public class JobService {
         existingJob.setSalary(updatedJob.getSalary());
         existingJob.setMinimumCgpa(updatedJob.getMinimumCgpa());
         existingJob.setMaximumBacklogs(updatedJob.getMaximumBacklogs());
+        existingJob.setAllowedBranches(updatedJob.getAllowedBranches());
+        existingJob.setGraduationYear(updatedJob.getGraduationYear());
         existingJob.setRequiredSkills(updatedJob.getRequiredSkills());
         existingJob.setJobType(updatedJob.getJobType());
 
