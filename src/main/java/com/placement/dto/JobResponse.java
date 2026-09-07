@@ -2,6 +2,9 @@ package com.placement.dto;
 
 import com.placement.entity.Job;
 import lombok.Data;
+
+import java.util.Set;
+
 @Data
 public class JobResponse {
 
@@ -12,6 +15,8 @@ public class JobResponse {
     private Double salary;
     private Double minimumCgpa;
     private String jobType;
+    private Integer maximumBacklogs;
+    private Set<String> requiredSkills;
 
     private Long companyId;
     private String companyName;
@@ -21,6 +26,7 @@ public class JobResponse {
 
     public JobResponse(Long id, String title, String description,
                        String location, Double salary, Double minimumCgpa,
+                       Integer maximumBacklogs, Set<String> requiredSkills,
                        String jobType, Long companyId, String companyName) {
 
         this.id = id;
@@ -29,6 +35,8 @@ public class JobResponse {
         this.location = location;
         this.salary = salary;
         this.minimumCgpa = minimumCgpa;
+        this.maximumBacklogs = maximumBacklogs;
+        this.requiredSkills = requiredSkills;
         this.jobType = jobType;
         this.companyId = companyId;
         this.companyName = companyName;
@@ -56,6 +64,14 @@ public class JobResponse {
 
     public Double getMinimumCgpa() {
         return minimumCgpa;
+    }
+
+    public Integer getMaximumBacklogs() {
+        return maximumBacklogs;
+    }
+
+    public Set<String> getRequiredSkills() {
+        return requiredSkills;
     }
 
     public String getJobType() {

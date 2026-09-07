@@ -133,6 +133,8 @@ public class JobService {
         existingJob.setLocation(updatedJob.getLocation());
         existingJob.setSalary(updatedJob.getSalary());
         existingJob.setMinimumCgpa(updatedJob.getMinimumCgpa());
+        existingJob.setMaximumBacklogs(updatedJob.getMaximumBacklogs());
+        existingJob.setRequiredSkills(updatedJob.getRequiredSkills());
         existingJob.setJobType(updatedJob.getJobType());
 
         return jobRepository.save(existingJob);
