@@ -121,6 +121,8 @@ public class StudentService {
             existingStudent.setBranch(student.getBranch());
             existingStudent.setCgpa(student.getCgpa());
             existingStudent.setGraduationYear(student.getGraduationYear());
+            existingStudent.setBacklogs(student.getBacklogs());
+            existingStudent.setSkills(student.getSkills());
 
             return studentRepository.save(existingStudent);
         }
@@ -147,6 +149,8 @@ public class StudentService {
         existingStudent.setBranch(student.getBranch());
         existingStudent.setCgpa(student.getCgpa());
         existingStudent.setGraduationYear(student.getGraduationYear());
+        existingStudent.setBacklogs(student.getBacklogs());
+        existingStudent.setSkills(student.getSkills());
 
         return studentRepository.save(existingStudent);
     }

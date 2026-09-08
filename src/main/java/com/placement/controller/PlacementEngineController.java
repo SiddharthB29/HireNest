@@ -1,5 +1,6 @@
 package com.placement.controller;
 
+import com.placement.dto.PlacementEvaluation;
 import com.placement.dto.PlacementResult;
 import com.placement.entity.Job;
 import com.placement.entity.Role;
@@ -16,6 +17,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/placement")
@@ -38,15 +41,8 @@ public class PlacementEngineController {
         this.userRepository = userRepository;
     }
 
-    @GetMapping("/evaluate/{jobId}/{studentId}")
-    public ResponseEntity<PlacementResult> evaluateStudent(
-            @PathVariable Long jobId,
-            @PathVariable Long studentId) {
 
-        Job job = jobRepository.findById(jobId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Job not found with id " + jobId));
+    private void verifyJobAccess(Job job) {
 
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
@@ -58,29 +54,41 @@ public class PlacementEngineController {
                         new ResourceNotFoundException(
                                 "User not found with username " + username));
 
-        // Admin can evaluate any job
-        if (user.getRole() != Role.ADMIN) {
-
-            // Recruiter must be associated with a company
-            if (user.getRole() != Role.RECRUITER ||
-                    user.getCompany() == null) {
-
-                throw new ResponseStatusException(
-                        HttpStatus.FORBIDDEN,
-                        "You are not allowed to use the placement engine"
-                );
-            }
-
-            // Recruiter can only evaluate students for their own company's jobs
-            if (!user.getCompany().getId()
-                    .equals(job.getCompany().getId())) {
-
-                throw new ResponseStatusException(
-                        HttpStatus.FORBIDDEN,
-                        "You are not allowed to evaluate students for this job"
-                );
-            }
+        // Admin can access any job
+        if (user.getRole() == Role.ADMIN) {
+            return;
         }
+
+        // Only recruiters can use the placement engine
+        if (user.getRole() != Role.RECRUITER ||
+                user.getCompany() == null) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "You are not allowed to use the placement engine"
+            );
+        }
+
+        // Recruiter can only access jobs belonging to their company
+        if (!user.getCompany().getId()
+                .equals(job.getCompany().getId())) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "You are not allowed to evaluate students for this job"
+            );
+        }
+    }
+
+
+    @GetMapping("/evaluate/{jobId}/{studentId}")
+    public ResponseEntity<PlacementResult> evaluateStudent(
+            @PathVariable Long jobId,
+            @PathVariable Long studentId) {
+
+        Job job = placementEngineService.getJob(jobId);
+
+        verifyJobAccess(job);
 
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() ->
@@ -89,6 +97,45 @@ public class PlacementEngineController {
 
         return ResponseEntity.ok(
                 placementEngineService.evaluate(student, job)
+        );
+    }
+
+    @GetMapping("/eligible/{jobId}")
+    public ResponseEntity<List<Student>> getEligibleStudents(
+            @PathVariable Long jobId) {
+
+        Job job = placementEngineService.getJob(jobId);
+
+        verifyJobAccess(job);
+
+        return ResponseEntity.ok(
+                placementEngineService.getEligibleStudents(job)
+        );
+    }
+
+    @GetMapping("/results/{jobId}")
+    public ResponseEntity<List<PlacementEvaluation>> evaluateAllStudents(
+            @PathVariable Long jobId) {
+
+        Job job = placementEngineService.getJob(jobId);
+
+        verifyJobAccess(job);
+
+        return ResponseEntity.ok(
+                placementEngineService.evaluateAllStudents(job)
+        );
+    }
+
+    @GetMapping("/candidates/{jobId}")
+    public ResponseEntity<List<PlacementEvaluation>> getCandidatePool(
+            @PathVariable Long jobId) {
+
+        Job job = placementEngineService.getJob(jobId);
+
+        verifyJobAccess(job);
+
+        return ResponseEntity.ok(
+                placementEngineService.getCandidatePool(job)
         );
     }
 }

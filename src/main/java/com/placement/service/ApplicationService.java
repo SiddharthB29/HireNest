@@ -162,7 +162,7 @@ public class ApplicationService {
         application.setStudent(student);
         application.setJob(job);
         application.setApplicationDate(request.getApplicationDate());
-        application.setStatus(request.getStatus());
+        application.setStatus(ApplicationStatus.APPLIED);
 
         return applicationRepository.save(application);
     }
