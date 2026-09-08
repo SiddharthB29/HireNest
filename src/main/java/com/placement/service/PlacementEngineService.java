@@ -148,7 +148,6 @@ public class PlacementEngineService {
             PlacementResult result = evaluate(student, job);
 
             if (result.isEligible()) {
-
                 candidates.add(
                         new PlacementEvaluation(
                                 student.getId(),
