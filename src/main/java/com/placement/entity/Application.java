@@ -1,6 +1,5 @@
 package com.placement.entity;
 
-import com.placement.entity.Job;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 

@@ -1,7 +1,6 @@
 package com.placement.controller;
 
 import com.placement.dto.PlacementEvaluation;
-import com.placement.dto.PlacementResult;
 import com.placement.entity.Job;
 import com.placement.entity.Role;
 import com.placement.entity.Student;
@@ -10,6 +9,8 @@ import com.placement.exception.ResourceNotFoundException;
 import com.placement.repository.JobRepository;
 import com.placement.repository.StudentRepository;
 import com.placement.repository.UserRepository;
+import com.placement.service.EligibilityResult;
+import com.placement.service.PlacementEngine;
 import com.placement.service.PlacementEngineService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,17 +29,20 @@ public class PlacementEngineController {
     private final StudentRepository studentRepository;
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
+    private final PlacementEngine placementEngine;
 
     public PlacementEngineController(
             PlacementEngineService placementEngineService,
             StudentRepository studentRepository,
             JobRepository jobRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            PlacementEngine placementEngine) {
 
         this.placementEngineService = placementEngineService;
         this.studentRepository = studentRepository;
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
+        this.placementEngine = placementEngine;
     }
 
 
@@ -82,7 +86,7 @@ public class PlacementEngineController {
 
 
     @GetMapping("/evaluate/{jobId}/{studentId}")
-    public ResponseEntity<PlacementResult> evaluateStudent(
+    public ResponseEntity<EligibilityResult> evaluateStudent(
             @PathVariable Long jobId,
             @PathVariable Long studentId) {
 
@@ -96,7 +100,7 @@ public class PlacementEngineController {
                                 "Student not found with id " + studentId));
 
         return ResponseEntity.ok(
-                placementEngineService.evaluate(student, job)
+                placementEngine.evaluate(student, job)
         );
     }
 

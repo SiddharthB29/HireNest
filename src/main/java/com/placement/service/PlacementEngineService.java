@@ -1,7 +1,6 @@
 package com.placement.service;
 
 import com.placement.dto.PlacementEvaluation;
-import com.placement.dto.PlacementResult;
 import com.placement.entity.Application;
 import com.placement.entity.ApplicationStatus;
 import com.placement.entity.Job;
@@ -21,66 +20,21 @@ public class PlacementEngineService {
     private final StudentRepository studentRepository;
     private final JobRepository jobRepository;
     private final ApplicationRepository applicationRepository;
+    private final PlacementEngine placementEngine;
 
     public PlacementEngineService(
             StudentRepository studentRepository,
             JobRepository jobRepository,
-            ApplicationRepository applicationRepository) {
+            ApplicationRepository applicationRepository,
+            PlacementEngine placementEngine) {
 
         this.studentRepository = studentRepository;
         this.jobRepository = jobRepository;
         this.applicationRepository = applicationRepository;
+        this.placementEngine = placementEngine;
     }
 
-    public PlacementResult evaluate(Student student, Job job) {
 
-        List<String> reasons = new ArrayList<>();
-
-        // CGPA check
-        if (job.getMinimumCgpa() != null &&
-                student.getCgpa() < job.getMinimumCgpa()) {
-
-            reasons.add("CGPA is below the minimum requirement");
-        }
-
-        // Backlog check
-        if (job.getMaximumBacklogs() != null &&
-                student.getBacklogs() > job.getMaximumBacklogs()) {
-
-            reasons.add("Student has more backlogs than allowed");
-        }
-
-        // Branch check
-        if (job.getAllowedBranches() != null &&
-                !job.getAllowedBranches().isEmpty() &&
-                !job.getAllowedBranches().contains(student.getBranch())) {
-
-            reasons.add("Student's branch is not eligible");
-        }
-
-        // Skills check
-        if (job.getRequiredSkills() != null &&
-                !job.getRequiredSkills().isEmpty()) {
-
-            if (student.getSkills() == null ||
-                    !student.getSkills().containsAll(job.getRequiredSkills())) {
-
-                reasons.add("Student does not have all required skills");
-            }
-        }
-
-        // Graduation year check
-        if (job.getGraduationYear() != null &&
-                !job.getGraduationYear().equals(student.getGraduationYear())) {
-
-            reasons.add("Student's graduation year does not match the requirement");
-        }
-
-        return new PlacementResult(
-                reasons.isEmpty(),
-                reasons
-        );
-    }
 
     public Job getJob(Long jobId) {
 
@@ -98,7 +52,8 @@ public class PlacementEngineService {
 
         for (Student student : students) {
 
-            PlacementResult result = evaluate(student, job);
+            EligibilityResult result =
+                    placementEngine.evaluate(student, job);
 
             if (result.isEligible()) {
                 eligibleStudents.add(student);
@@ -116,14 +71,15 @@ public class PlacementEngineService {
 
         for (Student student : students) {
 
-            PlacementResult result = evaluate(student, job);
+            EligibilityResult result =
+                    placementEngine.evaluate(student, job);
 
             evaluations.add(
                     new PlacementEvaluation(
                             student.getId(),
                             student.getName(),
                             result.isEligible(),
-                            result.getReasons()
+                            result.getFailedCriteria()
                     )
             );
         }
@@ -145,7 +101,8 @@ public class PlacementEngineService {
 
             Student student = application.getStudent();
 
-            PlacementResult result = evaluate(student, job);
+            EligibilityResult result =
+                    placementEngine.evaluate(student, job);
 
             if (result.isEligible()) {
                 candidates.add(
@@ -153,7 +110,7 @@ public class PlacementEngineService {
                                 student.getId(),
                                 student.getName(),
                                 true,
-                                result.getReasons()
+                                result.getFailedCriteria()
                         )
                 );
             }

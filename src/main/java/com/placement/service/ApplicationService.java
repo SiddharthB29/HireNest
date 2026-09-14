@@ -29,15 +29,18 @@ public class ApplicationService {
     private final StudentRepository studentRepository;
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
+    private final PlacementEngine placementEngine;
 
     public ApplicationService(ApplicationRepository applicationRepository,
                               StudentRepository studentRepository,
                               JobRepository jobRepository,
-                              UserRepository userRepository) {
+                              UserRepository userRepository,
+                              PlacementEngine placementEngine) {
         this.applicationRepository = applicationRepository;
         this.studentRepository = studentRepository;
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
+        this.placementEngine = placementEngine;
     }
 
     private User getAuthenticatedUser() {
@@ -157,6 +160,17 @@ public class ApplicationService {
             );
         }
 
+        EligibilityResult eligibilityResult =
+                placementEngine.evaluate(student, job);
+
+        if (!eligibilityResult.isEligible()) {
+
+            throw new ConflictException(
+                    "Student is not eligible for this job. Failed criteria: "
+                            + eligibilityResult.getFailedCriteria()
+            );
+        }
+
         Application application = new Application();
 
         application.setStudent(student);
@@ -187,8 +201,7 @@ public class ApplicationService {
             }
 
             return applicationRepository.findByJobCompanyId(
-                    user.getCompany().getId()
-            );
+                    user.getCompany().getId());
         }
 
         // Student can see only their own applications
