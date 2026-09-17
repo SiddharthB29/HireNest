@@ -26,18 +26,16 @@ import java.util.Optional;
 public class ApplicationService {
 
     private final ApplicationRepository applicationRepository;
-    private final StudentRepository studentRepository;
+//    private final StudentRepository studentRepository;
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
     private final PlacementEngine placementEngine;
 
     public ApplicationService(ApplicationRepository applicationRepository,
-                              StudentRepository studentRepository,
                               JobRepository jobRepository,
                               UserRepository userRepository,
                               PlacementEngine placementEngine) {
         this.applicationRepository = applicationRepository;
-        this.studentRepository = studentRepository;
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
         this.placementEngine = placementEngine;

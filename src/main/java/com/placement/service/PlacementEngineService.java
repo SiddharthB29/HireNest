@@ -1,10 +1,8 @@
 package com.placement.service;
 
+import com.placement.dto.CandidateRankingResponse;
 import com.placement.dto.PlacementEvaluation;
-import com.placement.entity.Application;
-import com.placement.entity.ApplicationStatus;
-import com.placement.entity.Job;
-import com.placement.entity.Student;
+import com.placement.entity.*;
 import com.placement.exception.ResourceNotFoundException;
 import com.placement.repository.ApplicationRepository;
 import com.placement.repository.JobRepository;
@@ -12,6 +10,7 @@ import com.placement.repository.StudentRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -21,17 +20,20 @@ public class PlacementEngineService {
     private final JobRepository jobRepository;
     private final ApplicationRepository applicationRepository;
     private final PlacementEngine placementEngine;
+    private final CandidateScoringService candidateScoringService;
 
     public PlacementEngineService(
             StudentRepository studentRepository,
             JobRepository jobRepository,
             ApplicationRepository applicationRepository,
-            PlacementEngine placementEngine) {
+            PlacementEngine placementEngine,
+            CandidateScoringService candidateScoringService) {
 
         this.studentRepository = studentRepository;
         this.jobRepository = jobRepository;
         this.applicationRepository = applicationRepository;
         this.placementEngine = placementEngine;
+        this.candidateScoringService = candidateScoringService;
     }
 
 
@@ -87,9 +89,9 @@ public class PlacementEngineService {
         return evaluations;
     }
 
-    public List<PlacementEvaluation> getCandidatePool(Job job) {
+    public List<CandidateRankingResponse> getCandidatePool(Job job) {
 
-        List<PlacementEvaluation> candidates = new ArrayList<>();
+        List<CandidateRankingResponse> candidates = new ArrayList<>();
 
         List<Application> applications =
                 applicationRepository.findByJobIdAndStatus(
@@ -105,15 +107,33 @@ public class PlacementEngineService {
                     placementEngine.evaluate(student, job);
 
             if (result.isEligible()) {
+
+                CandidateScore score =
+                        candidateScoringService.calculateScore(student, job);
+
                 candidates.add(
-                        new PlacementEvaluation(
+                        new CandidateRankingResponse(
+                                0,
                                 student.getId(),
                                 student.getName(),
-                                true,
-                                result.getFailedCriteria()
+                                score.getSkillScore(),
+                                score.getCgpaScore(),
+                                score.getProjectScore(),
+                                score.getCertificationScore(),
+                                score.getTotalScore()
                         )
                 );
             }
+        }
+
+        candidates.sort(
+                Comparator.comparing(
+                        CandidateRankingResponse::getTotalScore
+                ).reversed()
+        );
+
+        for (int i = 0; i < candidates.size(); i++) {
+            candidates.get(i).setRank(i + 1);
         }
 
         return candidates;

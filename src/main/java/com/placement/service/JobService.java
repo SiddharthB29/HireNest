@@ -137,6 +137,7 @@ public class JobService {
         existingJob.setAllowedBranches(updatedJob.getAllowedBranches());
         existingJob.setGraduationYear(updatedJob.getGraduationYear());
         existingJob.setRequiredSkills(updatedJob.getRequiredSkills());
+        existingJob.setPreferredSkills(updatedJob.getPreferredSkills());
         existingJob.setJobType(updatedJob.getJobType());
 
         return jobRepository.save(existingJob);

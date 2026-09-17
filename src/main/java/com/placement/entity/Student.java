@@ -27,6 +27,10 @@ public class Student {
     @ElementCollection
     private Set<String> skills;
 
+    private Integer projectCount;
+
+    private Integer certificationCount;
+
     private Integer graduationYear;
 
     public Long getId() {
@@ -91,6 +95,22 @@ public class Student {
 
     public void setSkills(Set<String> skills) {
         this.skills = skills;
+    }
+
+    public Integer getProjectCount() {
+        return projectCount;
+    }
+
+    public void setProjectCount(Integer projectCount) {
+        this.projectCount = projectCount;
+    }
+
+    public Integer getCertificationCount() {
+        return certificationCount;
+    }
+
+    public void setCertificationCount(Integer certificationCount) {
+        this.certificationCount = certificationCount;
     }
 
     public Integer getGraduationYear() {

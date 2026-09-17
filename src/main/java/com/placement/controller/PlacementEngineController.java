@@ -1,5 +1,6 @@
 package com.placement.controller;
 
+import com.placement.dto.CandidateRankingResponse;
 import com.placement.dto.PlacementEvaluation;
 import com.placement.entity.Job;
 import com.placement.entity.Role;
@@ -130,8 +131,8 @@ public class PlacementEngineController {
         );
     }
 
-    @GetMapping("/candidates/{jobId}")
-    public ResponseEntity<List<PlacementEvaluation>> getCandidatePool(
+@GetMapping("/candidates/{jobId}")
+    public ResponseEntity<List<CandidateRankingResponse>> getCandidatePool(
             @PathVariable Long jobId) {
 
         Job job = placementEngineService.getJob(jobId);

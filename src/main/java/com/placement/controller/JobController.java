@@ -57,6 +57,7 @@ public class JobController {
                         job.getMinimumCgpa(),
                         job.getMaximumBacklogs(),
                         job.getRequiredSkills(),
+                        job.getPreferredSkills(),
                         job.getJobType(),
                         job.getCompany().getId(),
                         job.getCompany().getName()
@@ -81,6 +82,7 @@ public class JobController {
                 job.getMinimumCgpa(),
                 job.getMaximumBacklogs(),
                 job.getRequiredSkills(),
+                job.getPreferredSkills(),
                 job.getJobType(),
                 job.getCompany().getId(),
                 job.getCompany().getName()
@@ -104,6 +106,7 @@ public class JobController {
                         job.getMinimumCgpa(),
                         job.getMaximumBacklogs(),
                         job.getRequiredSkills(),
+                        job.getPreferredSkills(),
                         job.getJobType(),
                         job.getCompany().getId(),
                         job.getCompany().getName()

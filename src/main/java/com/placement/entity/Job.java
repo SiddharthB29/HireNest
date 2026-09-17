@@ -28,6 +28,9 @@ public class Job {
     private Set<String> requiredSkills;
 
     @ElementCollection
+    private Set<String> preferredSkills;
+
+    @ElementCollection
     private Set<String> allowedBranches;
 
     private Integer graduationYear;
@@ -99,6 +102,14 @@ public class Job {
 
     public void setRequiredSkills(Set<String> requiredSkills) {
         this.requiredSkills = requiredSkills;
+    }
+
+    public Set<String> getPreferredSkills() {
+        return preferredSkills;
+    }
+
+    public void setPreferredSkills(Set<String> preferredSkills) {
+        this.preferredSkills = preferredSkills;
     }
 
     public Set<String> getAllowedBranches() {
