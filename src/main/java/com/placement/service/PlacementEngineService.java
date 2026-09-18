@@ -7,14 +7,13 @@ import com.placement.exception.ResourceNotFoundException;
 import com.placement.repository.ApplicationRepository;
 import com.placement.repository.JobRepository;
 import com.placement.repository.StudentRepository;
+import com.placement.specification.ApplicationSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class PlacementEngineService {
@@ -102,14 +101,21 @@ public class PlacementEngineService {
 
         List<CandidateRankingResponse> candidates = new ArrayList<>();
 
-        Page<Application> applicationPage =
-                applicationRepository.findByJobIdAndStatus(
-                        job.getId(),
-                        ApplicationStatus.APPLIED,
-                        Pageable.unpaged()
+        List<Application> applications =
+                applicationRepository.findAll(
+                        ApplicationSpecification.eligibleApplicationsForJob(job)
                 );
 
-        List<Application> applications = applicationPage.getContent();
+//        List<Student> eligibleStudents =
+//                studentRepository.findAll(
+//                        StudentSpecification.eligibleForJob(job)
+//                );
+//
+//        Set<Long> eligibleStudentIds = new HashSet<>();
+//
+//        for (Student student : eligibleStudents) {
+//            eligibleStudentIds.add(student.getId());
+//        }
 
         for (Application application : applications) {
 
@@ -125,8 +131,9 @@ public class PlacementEngineService {
 
                 if ((minScore == null ||
                         score.getTotalScore() >= minScore)
-                        && (minCgpa == null ||
-                        student.getCgpa() >= minCgpa)
+                        && (minCgpa == null
+                        || (student.getCgpa() != null
+                        && student.getCgpa() >= minCgpa))
                         && (minSkillScore == null ||
                         score.getSkillScore() >= minSkillScore)
                         && (minProjectScore == null ||
