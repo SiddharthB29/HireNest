@@ -13,7 +13,18 @@ export default defineConfig([
       js.configs.recommended,
       tseslint.configs.recommended,
       reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
+      {
+        ...reactRefresh.configs.vite,
+        // Context files conventionally export both the provider component and
+        // its useX hook; suppress fast-refresh rule there, keep it elsewhere.
+        rules: {
+          ...reactRefresh.configs.vite.rules,
+          'react-refresh/only-export-components': [
+            'error',
+            { allowConstantExport: true, checkJS: false },
+          ],
+        },
+      },
     ],
     languageOptions: {
       globals: globals.browser,
