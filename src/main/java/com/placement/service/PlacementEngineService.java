@@ -7,6 +7,9 @@ import com.placement.exception.ResourceNotFoundException;
 import com.placement.repository.ApplicationRepository;
 import com.placement.repository.JobRepository;
 import com.placement.repository.StudentRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -89,15 +92,19 @@ public class PlacementEngineService {
         return evaluations;
     }
 
-    public List<CandidateRankingResponse> getCandidatePool(Job job) {
+    public Page<CandidateRankingResponse> getCandidatePool(Job job,
+                                                           Pageable pageable) {
 
         List<CandidateRankingResponse> candidates = new ArrayList<>();
 
-        List<Application> applications =
+        Page<Application> applicationPage =
                 applicationRepository.findByJobIdAndStatus(
                         job.getId(),
-                        ApplicationStatus.APPLIED
+                        ApplicationStatus.APPLIED,
+                        pageable
                 );
+
+        List<Application> applications = applicationPage.getContent();
 
         for (Application application : applications) {
 
@@ -133,9 +140,15 @@ public class PlacementEngineService {
         );
 
         for (int i = 0; i < candidates.size(); i++) {
-            candidates.get(i).setRank(i + 1);
+            candidates.get(i).setRank(
+                    (int) pageable.getOffset() + i + 1
+            );
         }
 
-        return candidates;
+        return new PageImpl<>(
+                candidates,
+                pageable,
+                applicationPage.getTotalElements()
+        );
     }
 }

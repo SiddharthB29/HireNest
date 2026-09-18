@@ -13,6 +13,8 @@ import com.placement.repository.UserRepository;
 import com.placement.service.EligibilityResult;
 import com.placement.service.PlacementEngine;
 import com.placement.service.PlacementEngineService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -131,16 +133,17 @@ public class PlacementEngineController {
         );
     }
 
-@GetMapping("/candidates/{jobId}")
-    public ResponseEntity<List<CandidateRankingResponse>> getCandidatePool(
-            @PathVariable Long jobId) {
+    @GetMapping("/candidates/{jobId}")
+    public ResponseEntity<Page<CandidateRankingResponse>> getCandidatePool(
+            @PathVariable Long jobId,
+            Pageable pageable) {
 
         Job job = placementEngineService.getJob(jobId);
 
         verifyJobAccess(job);
 
         return ResponseEntity.ok(
-                placementEngineService.getCandidatePool(job)
+                placementEngineService.getCandidatePool(job, pageable)
         );
     }
 }
