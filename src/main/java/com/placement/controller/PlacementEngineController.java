@@ -1,6 +1,7 @@
 package com.placement.controller;
 
 import com.placement.dto.CandidateRankingResponse;
+import com.placement.dto.PageResponse;
 import com.placement.dto.PlacementEvaluation;
 import com.placement.entity.Job;
 import com.placement.entity.Role;
@@ -134,7 +135,7 @@ public class PlacementEngineController {
     }
 
     @GetMapping("/candidates/{jobId}")
-    public ResponseEntity<Page<CandidateRankingResponse>> getCandidatePool(
+    ResponseEntity<PageResponse<CandidateRankingResponse>> getCandidatePool(
             @PathVariable Long jobId,
             @RequestParam(required = false) Double minScore,
             @RequestParam(required = false) Double minCgpa,
@@ -147,14 +148,19 @@ public class PlacementEngineController {
 
         verifyJobAccess(job);
 
-        return ResponseEntity.ok(
-                placementEngineService.getCandidatePool(job,
+        Page<CandidateRankingResponse> result =
+                placementEngineService.getCandidatePool(
+                                                        job,
                                                         minScore,
                                                         minCgpa,
                                                         minSkillScore,
                                                         minProjectScore,
                                                         minCertificationScore,
-                                                        pageable)
+                                                        pageable
+                );
+
+        return ResponseEntity.ok(
+                new PageResponse<>(result)
         );
     }
 }
