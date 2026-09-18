@@ -136,6 +136,11 @@ public class PlacementEngineController {
     @GetMapping("/candidates/{jobId}")
     public ResponseEntity<Page<CandidateRankingResponse>> getCandidatePool(
             @PathVariable Long jobId,
+            @RequestParam(required = false) Double minScore,
+            @RequestParam(required = false) Double minCgpa,
+            @RequestParam(required = false) Double minSkillScore,
+            @RequestParam(required = false) Double minProjectScore,
+            @RequestParam(required = false) Double minCertificationScore,
             Pageable pageable) {
 
         Job job = placementEngineService.getJob(jobId);
@@ -143,7 +148,13 @@ public class PlacementEngineController {
         verifyJobAccess(job);
 
         return ResponseEntity.ok(
-                placementEngineService.getCandidatePool(job, pageable)
+                placementEngineService.getCandidatePool(job,
+                                                        minScore,
+                                                        minCgpa,
+                                                        minSkillScore,
+                                                        minProjectScore,
+                                                        minCertificationScore,
+                                                        pageable)
         );
     }
 }

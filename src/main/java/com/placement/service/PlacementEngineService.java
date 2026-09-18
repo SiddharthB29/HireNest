@@ -93,6 +93,11 @@ public class PlacementEngineService {
     }
 
     public Page<CandidateRankingResponse> getCandidatePool(Job job,
+                                                           Double minScore,
+                                                           Double minCgpa,
+                                                           Double minSkillScore,
+                                                           Double minProjectScore,
+                                                           Double minCertificationScore,
                                                            Pageable pageable) {
 
         List<CandidateRankingResponse> candidates = new ArrayList<>();
@@ -101,7 +106,7 @@ public class PlacementEngineService {
                 applicationRepository.findByJobIdAndStatus(
                         job.getId(),
                         ApplicationStatus.APPLIED,
-                        pageable
+                        Pageable.unpaged()
                 );
 
         List<Application> applications = applicationPage.getContent();
@@ -118,18 +123,30 @@ public class PlacementEngineService {
                 CandidateScore score =
                         candidateScoringService.calculateScore(student, job);
 
-                candidates.add(
-                        new CandidateRankingResponse(
-                                0,
-                                student.getId(),
-                                student.getName(),
-                                score.getSkillScore(),
-                                score.getCgpaScore(),
-                                score.getProjectScore(),
-                                score.getCertificationScore(),
-                                score.getTotalScore()
-                        )
-                );
+                if ((minScore == null ||
+                        score.getTotalScore() >= minScore)
+                        && (minCgpa == null ||
+                        student.getCgpa() >= minCgpa)
+                        && (minSkillScore == null ||
+                        score.getSkillScore() >= minSkillScore)
+                        && (minProjectScore == null ||
+                        score.getProjectScore() >= minProjectScore)
+                        && (minCertificationScore == null ||
+                        score.getCertificationScore() >= minCertificationScore)) {
+
+                    candidates.add(
+                            new CandidateRankingResponse(
+                                    0,
+                                    student.getId(),
+                                    student.getName(),
+                                    score.getSkillScore(),
+                                    score.getCgpaScore(),
+                                    score.getProjectScore(),
+                                    score.getCertificationScore(),
+                                    score.getTotalScore()
+                            )
+                    );
+                }
             }
         }
 
@@ -139,16 +156,31 @@ public class PlacementEngineService {
                 ).reversed()
         );
 
+        // Assign global ranks
         for (int i = 0; i < candidates.size(); i++) {
-            candidates.get(i).setRank(
-                    (int) pageable.getOffset() + i + 1
-            );
+            candidates.get(i).setRank(i + 1);
+        }
+
+        // Apply pagination after filtering and ranking
+        int start = (int) pageable.getOffset();
+
+        int end = Math.min(
+                start + pageable.getPageSize(),
+                candidates.size()
+        );
+
+        List<CandidateRankingResponse> pagedCandidates;
+
+        if (start >= candidates.size()) {
+            pagedCandidates = new ArrayList<>();
+        } else {
+            pagedCandidates = candidates.subList(start, end);
         }
 
         return new PageImpl<>(
-                candidates,
+                pagedCandidates,
                 pageable,
-                applicationPage.getTotalElements()
+                candidates.size()
         );
     }
 }
