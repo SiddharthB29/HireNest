@@ -43,7 +43,7 @@ export function PublicNavbar() {
               <Link to="/login" className="btn btn-ghost" onClick={close}>
                 Log in
               </Link>
-              <Link to="/register" className="btn btn-gradient" onClick={close}>
+              <Link to="/register" className="btn btn-primary" onClick={close}>
                 Get started
               </Link>
             </>

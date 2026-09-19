@@ -81,7 +81,7 @@ function RecruiterJobs() {
             Create, edit, and manage your company&apos;s openings.
           </p>
         </div>
-        <button className="btn btn-gradient" onClick={() => setModal({ mode: 'create' })}>
+        <button className="btn btn-primary" onClick={() => setModal({ mode: 'create' })}>
           + Post a job
         </button>
       </div>

@@ -1,67 +1,60 @@
 /* ============================================================
-   HireNest Design Tokens
+   HireNest Design Tokens — editorial theme
+   Inspired by award-winning editorial-minimalist portfolios:
+   warm paper background, near-black ink, hairline rules,
+   serif display type, one restrained accent.
    ============================================================ */
 
 :root {
-  /* ---- Brand / primary ---- */
-  --primary-50: #eef2ff;
-  --primary-100: #e0e7ff;
-  --primary-200: #c7d2fe;
-  --primary-300: #a5b4fc;
-  --primary-400: #818cf8;
-  --primary-500: #6366f1;
-  --primary-600: #4f46e5;
-  --primary-700: #4338ca;
-  --primary-800: #3730a3;
-  --primary-900: #312e81;
+  /* ---- Ink (primary action color = near-black) ---- */
+  --ink: #1a1812;
+  --ink-soft: #3d3a30;
 
-  --accent: #14b8a6;         /* teal accent for gradients / highlights */
-  --accent-strong: #0d9488;
+  /* ---- Single restrained accent (links, focus, ✳︎ marks) ---- */
+  --accent: #8a6a3f;         /* muted bronze */
+  --accent-strong: #6f5430;
+  --accent-tint: rgba(138, 106, 63, 0.12);
 
-  /* ---- Neutrals (slate) ---- */
-  --gray-50: #f8fafc;
-  --gray-100: #f1f5f9;
-  --gray-200: #e2e8f0;
-  --gray-300: #cbd5e1;
-  --gray-400: #94a3b8;
-  --gray-500: #64748b;
-  --gray-600: #475569;
-  --gray-700: #334155;
-  --gray-800: #1e293b;
-  --gray-900: #0f172a;
-  --gray-950: #020617;
+  /* ---- Warm neutrals ---- */
+  --gray-50: #faf9f5;
+  --gray-100: #f3f1ea;
+  --gray-200: #e7e4d9;
+  --gray-300: #d6d2c4;
+  --gray-400: #a39e8e;
+  --gray-500: #7d7869;
+  --gray-600: #5c584c;
+  --gray-700: #45413a;
+  --gray-800: #2e2b25;
+  --gray-900: #1a1812;
+  --gray-950: #12100c;
 
-  /* ---- Semantic ---- */
-  --success: #16a34a;
-  --success-bg: #dcfce7;
-  --success-text: #15803d;
-  --warning: #d97706;
-  --warning-bg: #fef3c7;
-  --warning-text: #b45309;
-  --error: #dc2626;
-  --error-bg: #fee2e2;
-  --error-text: #b91c1c;
-  --info: #0284c7;
-  --info-bg: #e0f2fe;
-  --info-text: #0369a1;
+  /* ---- Semantic (muted, editorial) ---- */
+  --success: #4a7c59;
+  --success-bg: rgba(74, 124, 89, 0.1);
+  --success-text: #3a6247;
+  --warning: #a16207;
+  --warning-bg: rgba(161, 98, 7, 0.1);
+  --warning-text: #7c4d08;
+  --error: #a13d2d;
+  --error-bg: rgba(161, 61, 45, 0.1);
+  --error-text: #7f3021;
+  --info: #4a6b7c;
+  --info-bg: rgba(74, 107, 124, 0.1);
+  --info-text: #385462;
 
   /* ---- Applied theme (light) ---- */
   --bg: var(--gray-50);
-  --bg-elevated: #ffffff;
+  --bg-elevated: #fffefb;
   --bg-subtle: var(--gray-100);
-  --bg-inset: var(--gray-100);
+  --bg-inset: #edebe1;
   --text: var(--gray-600);
-  --text-strong: var(--gray-900);
+  --text-strong: var(--gray-800);
   --text-heading: var(--gray-900);
   --border: var(--gray-200);
   --border-strong: var(--gray-300);
 
-  /* ---- Gradients ---- */
-  --gradient-brand: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-500) 55%, var(--accent) 130%);
-  --gradient-hero: radial-gradient(1200px 600px at 80% -10%, rgba(99, 102, 241, 0.18), transparent 60%),
-                   radial-gradient(900px 500px at -10% 30%, rgba(20, 184, 166, 0.14), transparent 55%);
-
   /* ---- Typography ---- */
+  --font-display: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
   --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: ui-monospace, 'SF Mono', Consolas, 'Liberation Mono', monospace;
 
@@ -73,11 +66,12 @@
   --fs-2xl: 1.75rem;     /* 28px */
   --fs-3xl: 2.25rem;     /* 36px */
   --fs-4xl: 3rem;        /* 48px */
-  --fs-hero: clamp(2.5rem, 5vw, 3.75rem);
+  --fs-hero: clamp(2.75rem, 6.5vw, 5rem);   /* editorial display */
+  --fs-display: clamp(2rem, 4.5vw, 3.25rem); /* section display */
 
-  --lh-tight: 1.15;
+  --lh-tight: 1.12;
   --lh-snug: 1.35;
-  --lh-normal: 1.6;
+  --lh-normal: 1.65;
 
   /* ---- Spacing (4px base) ---- */
   --sp-1: 0.25rem;
@@ -93,18 +87,18 @@
   --sp-20: 5rem;
   --sp-24: 6rem;
 
-  /* ---- Radii ---- */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 20px;
+  /* ---- Radii (sharper, editorial) ---- */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
   --radius-full: 999px;
 
-  /* ---- Shadows ---- */
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
-  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
-  --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
-  --shadow-primary: 0 8px 24px rgba(79, 70, 229, 0.28);
+  /* ---- Shadows (near-flat; hairlines do the work) ---- */
+  --shadow-sm: none;
+  --shadow-md: 0 1px 3px rgba(26, 24, 18, 0.05);
+  --shadow-lg: 0 8px 28px rgba(26, 24, 18, 0.09);
+  --shadow-primary: 0 4px 14px rgba(26, 24, 18, 0.16);
 
   /* ---- Transitions ---- */
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
@@ -121,30 +115,37 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0b1120;
-    --bg-elevated: #111827;
-    --bg-subtle: #151e31;
-    --bg-inset: #0f1629;
-    --text: #9aa7bd;
-    --text-strong: #e2e8f0;
-    --text-heading: #f1f5f9;
-    --border: #24304a;
-    --border-strong: #32406212;
-    --border-strong: #334166;
+    /* warm charcoal — the same paper, lights off */
+    --bg: #161512;
+    --bg-elevated: #1d1c17;
+    --bg-subtle: #232219;
+    --bg-inset: #2a2820;
+    --text: #a8a496;
+    --text-strong: #ddd9cb;
+    --text-heading: #f4f1e6;
+    --border: #2e2c24;
+    --border-strong: #413d31;
 
-    --success-bg: rgba(22, 163, 74, 0.16);
-    --success-text: #4ade80;
-    --warning-bg: rgba(217, 119, 6, 0.16);
-    --warning-text: #fbbf24;
-    --error-bg: rgba(220, 38, 38, 0.18);
-    --error-text: #f87171;
-    --info-bg: rgba(2, 132, 199, 0.18);
-    --info-text: #38bdf8;
+    --ink: #f4f1e6;
+    --ink-soft: #c9c5b6;
 
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
-    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
-    --shadow-primary: 0 8px 24px rgba(79, 70, 229, 0.35);
+    --accent: #c9a468;
+    --accent-strong: #ddb87e;
+    --accent-tint: rgba(201, 164, 104, 0.14);
+
+    --success-bg: rgba(122, 176, 137, 0.14);
+    --success-text: #8fbd9c;
+    --warning-bg: rgba(214, 158, 68, 0.14);
+    --warning-text: #d9a852;
+    --error-bg: rgba(214, 106, 88, 0.14);
+    --error-text: #dd8b74;
+    --info-bg: rgba(120, 160, 182, 0.14);
+    --info-text: #8fb8cc;
+
+    --shadow-sm: none;
+    --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.45);
+    --shadow-primary: 0 4px 14px rgba(0, 0, 0, 0.5);
 
     color-scheme: dark;
   }

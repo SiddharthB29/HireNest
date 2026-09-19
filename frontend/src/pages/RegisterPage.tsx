@@ -130,7 +130,7 @@ export function RegisterPage() {
                 </p>
               )}
 
-              <button type="submit" className="btn btn-gradient btn-lg" style={{ width: '100%' }} disabled={submitting}>
+              <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%' }} disabled={submitting}>
                 {submitting ? 'Creating account…' : 'Create account'}
               </button>
             </form>

@@ -120,24 +120,27 @@ export function JobsPage() {
 
 export function JobCard({ job }: { job: Job }) {
   return (
-    <Link to={`/jobs/${job.id}`} className="card card-hover card-pad job-card" style={{ color: 'inherit', textDecoration: 'none' }}>
+    <Link to={`/jobs/${job.id}`} className="job-card" style={{ color: 'inherit', textDecoration: 'none' }}>
       <div className="job-card-top">
         <div className="job-company">
-          <span className="job-logo">{job.companyName.slice(0, 1)}</span>
+          <span className="job-logo">{job.companyName}</span>
           <div>
-            <div className="text-strong">{job.title}</div>
-            <div className="text-xs text-muted">{job.companyName}</div>
+            <div className="text-strong" style={{ fontSize: 'var(--fs-lg)', fontFamily: 'var(--font-display)', fontWeight: 500 }}>
+              {job.title}
+            </div>
           </div>
         </div>
-        <span className="badge badge-primary">{job.jobType}</span>
+        <span className="badge badge-neutral">{job.jobType}</span>
       </div>
 
       <p className="job-desc">{job.description}</p>
 
       <div className="job-meta text-xs text-muted">
-        <span>📍 {job.location}</span>
-        <span>💰 {formatSalary(job.salary)}</span>
-        <span>🎓 CGPA {job.minimumCgpa}+</span>
+        <span>{job.location}</span>
+        <span aria-hidden="true">·</span>
+        <span>{formatSalary(job.salary)}</span>
+        <span aria-hidden="true">·</span>
+        <span>CGPA {job.minimumCgpa}+</span>
       </div>
 
       <div className="skills-row">
@@ -150,6 +153,10 @@ export function JobCard({ job }: { job: Job }) {
           <span className="badge badge-neutral">+{job.requiredSkills.length - 4}</span>
         )}
       </div>
+
+      <span className="arrow-link" style={{ alignSelf: 'flex-start' }}>
+        View role <span className="arrow" aria-hidden="true">↗</span>
+      </span>
     </Link>
   );
 }

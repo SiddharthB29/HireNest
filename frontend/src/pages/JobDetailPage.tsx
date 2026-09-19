@@ -86,16 +86,13 @@ export function JobDetailPage() {
   return (
     <Shell>
       <div className="job-detail-head">
-        <div className="job-company">
-          <span className="job-logo">{jobData.companyName.slice(0, 1)}</span>
-          <div>
-            <h1 className="page-title" style={{ marginBottom: 2 }}>
-              {jobData.title}
-            </h1>
-            <div className="text-sm text-muted">
-              {jobData.companyName} · {jobData.location}
-            </div>
-          </div>
+        <div className="job-company" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 'var(--sp-2)' }}>
+          <span className="eyebrow">
+            <span className="mark" aria-hidden="true">✳︎</span> {jobData.companyName} · {jobData.location}
+          </span>
+          <h1 className="page-title" style={{ marginBottom: 0 }}>
+            {jobData.title}
+          </h1>
         </div>
 
         <div style={{ display: 'flex', gap: 'var(--sp-3)', flexWrap: 'wrap' }}>
@@ -114,8 +111,8 @@ export function JobDetailPage() {
               {myApplication.status}
             </span>
           ) : (
-            <button className="btn btn-gradient btn-lg" onClick={handleApply} disabled={applying}>
-              {applying ? 'Applying…' : user ? 'Apply now' : 'Log in to apply'}
+            <button className="btn btn-primary btn-lg" onClick={handleApply} disabled={applying}>
+              {applying ? 'Applying…' : user ? 'Apply now ↗' : 'Log in to apply'}
             </button>
           )}
         </div>
@@ -123,99 +120,95 @@ export function JobDetailPage() {
 
       <div className="detail-grid">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-6)' }}>
-          <section className="card panel" style={{ marginBottom: 0 }}>
-            <div className="panel-head">
-              <h2>About the role</h2>
+          <section className="panel" style={{ marginBottom: 0 }}>
+            <div className="section-rule">
+              <span>About the role</span>
             </div>
-            <div className="panel-body">
-              <p style={{ whiteSpace: 'pre-line' }}>{jobData.description}</p>
-            </div>
+            <p style={{ whiteSpace: 'pre-line' }}>{jobData.description}</p>
           </section>
 
-          <section className="card panel" style={{ marginBottom: 0 }}>
-            <div className="panel-head">
-              <h2>Skills</h2>
+          <section className="panel" style={{ marginBottom: 0 }}>
+            <div className="section-rule">
+              <span>Skills</span>
             </div>
-            <div className="panel-body">
-              <h3 className="text-sm text-strong" style={{ marginBottom: 'var(--sp-2)' }}>Required</h3>
-              <div className="skills-row" style={{ marginBottom: 'var(--sp-4)' }}>
-                {jobData.requiredSkills.map((skill) => (
-                  <span key={skill} className="badge badge-primary">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-              {jobData.preferredSkills.length > 0 && (
-                <>
-                  <h3 className="text-sm text-strong" style={{ marginBottom: 'var(--sp-2)' }}>Preferred</h3>
-                  <div className="skills-row">
-                    {jobData.preferredSkills.map((skill) => (
-                      <span key={skill} className="badge badge-neutral">
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </>
-              )}
+            <h3 className="text-sm text-strong" style={{ marginBottom: 'var(--sp-2)' }}>
+              Required
+            </h3>
+            <div className="skills-row" style={{ marginBottom: 'var(--sp-4)' }}>
+              {jobData.requiredSkills.map((skill) => (
+                <span key={skill} className="badge badge-neutral">
+                  {skill}
+                </span>
+              ))}
             </div>
+            {jobData.preferredSkills.length > 0 && (
+              <>
+                <h3 className="text-sm text-strong" style={{ marginBottom: 'var(--sp-2)' }}>
+                  Preferred
+                </h3>
+                <div className="skills-row">
+                  {jobData.preferredSkills.map((skill) => (
+                    <span key={skill} className="badge badge-neutral">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </>
+            )}
           </section>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-6)' }}>
-          <section className="card panel" style={{ marginBottom: 0 }}>
-            <div className="panel-head">
-              <h2>Eligibility</h2>
+          <section className="panel" style={{ marginBottom: 0 }}>
+            <div className="section-rule">
+              <span>Eligibility</span>
             </div>
-            <div className="panel-body">
-              <div className="criteria-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                <CriteriaItem label="Min CGPA" value={String(jobData.minimumCgpa)} />
-                <CriteriaItem label="Max backlogs" value={String(jobData.maximumBacklogs)} />
-                <CriteriaItem label="Job type" value={jobData.jobType} />
-                <CriteriaItem
-                  label="Graduation"
-                  value={jobData.graduationYear ? String(jobData.graduationYear) : 'Any'}
-                />
+            <dl className="meta-table" style={{ margin: 0 }}>
+              <div className="meta-row">
+                <dt>Min CGPA</dt>
+                <dd>{jobData.minimumCgpa}</dd>
+              </div>
+              <div className="meta-row">
+                <dt>Max backlogs</dt>
+                <dd>{jobData.maximumBacklogs}</dd>
+              </div>
+              <div className="meta-row">
+                <dt>Job type</dt>
+                <dd>{jobData.jobType}</dd>
+              </div>
+              <div className="meta-row">
+                <dt>Graduation</dt>
+                <dd>{jobData.graduationYear ? String(jobData.graduationYear) : 'Any'}</dd>
               </div>
               {jobData.allowedBranches.length > 0 && (
-                <div style={{ marginTop: 'var(--sp-4)' }}>
-                  <div className="text-xs text-muted" style={{ marginBottom: 'var(--sp-2)' }}>
-                    Allowed branches
-                  </div>
-                  <div className="skills-row">
-                    {jobData.allowedBranches.map((branch) => (
-                      <span key={branch} className="badge badge-neutral">
-                        {branch}
-                      </span>
-                    ))}
-                  </div>
+                <div className="meta-row">
+                  <dt>Branches</dt>
+                  <dd>
+                    <div className="skills-row">
+                      {jobData.allowedBranches.map((branch) => (
+                        <span key={branch} className="badge badge-neutral">
+                          {branch}
+                        </span>
+                      ))}
+                    </div>
+                  </dd>
                 </div>
               )}
-            </div>
+            </dl>
           </section>
 
-          <section className="card panel" style={{ marginBottom: 0 }}>
-            <div className="panel-head">
-              <h2>Package</h2>
+          <section className="panel" style={{ marginBottom: 0 }}>
+            <div className="section-rule">
+              <span>Package</span>
             </div>
-            <div className="panel-body">
-              <div className="stat-value" style={{ fontSize: 'var(--fs-2xl)' }}>
-                {formatSalary(jobData.salary)}
-              </div>
-              <p className="text-sm text-muted">per annum</p>
+            <div className="stat-value" style={{ fontSize: 'var(--fs-2xl)' }}>
+              {formatSalary(jobData.salary)}
             </div>
+            <p className="text-sm text-muted">per annum</p>
           </section>
         </div>
       </div>
     </Shell>
-  );
-}
-
-function CriteriaItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="criteria-item">
-      <div className="label">{label}</div>
-      <div className="value">{value}</div>
-    </div>
   );
 }
 
