@@ -2,7 +2,7 @@ import { DashboardLayout } from '../../components/DashboardLayout';
 import { ErrorBanner, LoadingBlock } from '../../components/States';
 import { useAsyncData } from '../../hooks/useAsyncData';
 import { ADMIN_LINKS } from '../../lib/navLinks';
-import * as api from '../../services/mockApi';
+import * as api from '../../services/apiClient';
 
 export function AdminDashboardPage() {
   return (

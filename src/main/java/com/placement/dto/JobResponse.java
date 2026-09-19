@@ -18,6 +18,8 @@ public class JobResponse {
     private Integer maximumBacklogs;
     private Set<String> requiredSkills;
     private Set<String> preferredSkills;
+    private Set<String> allowedBranches;
+    private Integer graduationYear;
 
     private Long companyId;
     private String companyName;
@@ -28,7 +30,8 @@ public class JobResponse {
     public JobResponse(Long id, String title, String description,
                        String location, Double salary, Double minimumCgpa,
                        Integer maximumBacklogs, Set<String> requiredSkills,
-                       Set<String> preferredSkills, String jobType,
+                       Set<String> preferredSkills, Set<String> allowedBranches,
+                       Integer graduationYear, String jobType,
                        Long companyId, String companyName) {
 
         this.id = id;
@@ -40,6 +43,8 @@ public class JobResponse {
         this.maximumBacklogs = maximumBacklogs;
         this.requiredSkills = requiredSkills;
         this.preferredSkills = preferredSkills;
+        this.allowedBranches = allowedBranches;
+        this.graduationYear = graduationYear;
         this.jobType = jobType;
         this.companyId = companyId;
         this.companyName = companyName;
@@ -79,6 +84,14 @@ public class JobResponse {
 
     public Set<String> getPreferredSkills() {
         return preferredSkills;
+    }
+
+    public Set<String> getAllowedBranches() {
+        return allowedBranches;
+    }
+
+    public Integer getGraduationYear() {
+        return graduationYear;
     }
 
     public String getJobType() {

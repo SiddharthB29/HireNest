@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { DashboardLayout } from '../../components/DashboardLayout';
-import { ErrorBanner, LoadingBlock } from '../../components/States';
+import { EmptyState, ErrorBanner, LoadingBlock } from '../../components/States';
 import { useToast } from '../../context/ToastContext';
 import { useAsyncData } from '../../hooks/useAsyncData';
-import * as api from '../../services/mockApi';
+import * as api from '../../services/apiClient';
 import { ADMIN_LINKS } from '../../lib/navLinks';
 
 export function AdminRecruitersPage() {
@@ -17,7 +17,10 @@ export function AdminRecruitersPage() {
 
 function AdminRecruiters() {
   const { showToast } = useToast();
-  const { data, loading, error, reload } = useAsyncData(() => api.getCompanies(), []);
+  const { data, loading, error, reload } = useAsyncData(
+    () => Promise.all([api.getCompanies(), api.getRecruiters()]),
+    [],
+  );
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -38,6 +41,8 @@ function AdminRecruiters() {
     return <ErrorBanner message={error ?? 'Failed to load'} onRetry={reload} />;
   }
 
+  const [companies, recruiters] = data;
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!username.trim() || password.length < 6 || !companyId) {
@@ -47,12 +52,17 @@ function AdminRecruiters() {
     setSubmitting(true);
     setFormError(null);
     try {
-      // Mirrors POST /api/auth/admin/recruiters (admin-only endpoint).
-      await api.register(username.trim(), password);
+      // POST /api/auth/admin/recruiters (admin-only endpoint).
+      await api.createRecruiter({
+        userName: username.trim(),
+        password,
+        companyId: Number(companyId),
+      });
       showToast('success', `Recruiter account created for ${username.trim()}`);
       setUsername('');
       setPassword('');
       setCompanyId('');
+      reload();
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Failed to create recruiter');
     } finally {
@@ -106,7 +116,7 @@ function AdminRecruiters() {
                   onChange={(e) => setCompanyId(e.target.value)}
                 >
                   <option value="">Select a company…</option>
-                  {data.map((company) => (
+                  {companies.map((company) => (
                     <option key={company.id} value={company.id}>
                       {company.name}
                     </option>
@@ -147,6 +157,41 @@ function AdminRecruiters() {
           </div>
         </section>
       </div>
+
+      <section style={{ marginTop: 'var(--sp-8)' }}>
+        <h2 className="text-lg" style={{ marginBottom: 'var(--sp-4)' }}>
+          Existing recruiter accounts ({recruiters.length})
+        </h2>
+        {recruiters.length === 0 ? (
+          <EmptyState
+            title="No recruiter accounts yet"
+            message="Create the first recruiter account with the form above."
+          />
+        ) : (
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Company</th>
+                  <th>Role</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recruiters.map((recruiter) => (
+                  <tr key={recruiter.id}>
+                    <td className="text-strong">{recruiter.userName}</td>
+                    <td>{recruiter.companyName ?? '—'}</td>
+                    <td>
+                      <span className="badge badge-neutral">{recruiter.role}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </>
   );
 }

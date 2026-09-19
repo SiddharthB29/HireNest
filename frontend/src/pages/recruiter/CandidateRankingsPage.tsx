@@ -4,12 +4,14 @@ import { DashboardLayout } from '../../components/DashboardLayout';
 import { EmptyState, ErrorBanner, LoadingBlock } from '../../components/States';
 import { useAsyncData } from '../../hooks/useAsyncData';
 import { scoreColor } from '../../lib/format';
-import * as api from '../../services/mockApi';
+import * as api from '../../services/apiClient';
 import { RECRUITER_LINKS } from '../../lib/navLinks';
+
+const PAGE_SIZE = 20;
 
 type Tab = 'rankings' | 'eligibility';
 
-/** Ranked candidate pool + eligibility results for a single job. */
+/** Ranked candidate pool + eligibility results for a single job (real placement engine). */
 export function CandidateRankingsPage() {
   const { jobId } = useParams<{ jobId: string }>();
   const id = Number(jobId);
@@ -24,8 +26,18 @@ export function CandidateRankingsPage() {
 function CandidateRankings({ jobId }: { jobId: number }) {
   const [tab, setTab] = useState<Tab>('rankings');
   const [minScore, setMinScore] = useState(0);
+  const [page, setPage] = useState(0);
 
-  const rankings = useAsyncData(() => api.getCandidateRankings(jobId), [jobId]);
+  // Server-side filtering + pagination via GET /api/placement/candidates/{jobId}.
+  const rankings = useAsyncData(
+    () =>
+      api.getCandidatePool(jobId, {
+        minScore: minScore > 0 ? minScore : undefined,
+        page,
+        size: PAGE_SIZE,
+      }),
+    [jobId, minScore, page],
+  );
   const job = useAsyncData(() => api.getJobById(jobId), [jobId]);
   const evaluations = useAsyncData(
     () => (tab === 'eligibility' ? api.getPlacementEvaluations(jobId) : Promise.resolve([])),
@@ -45,8 +57,12 @@ function CandidateRankings({ jobId }: { jobId: number }) {
     return <ErrorBanner message={rankings.error ?? job.error ?? 'Failed to load'} onRetry={rankings.reload} />;
   }
 
-  const jobData = job.data;
-  const filtered = rankings.data.filter((c) => c.totalScore >= minScore);
+  const jobData = {
+    ...job.data,
+    requiredSkills: job.data.requiredSkills ?? [],
+  };
+  const pool = rankings.data;
+  const rows = pool.content;
 
   return (
     <>
@@ -82,58 +98,92 @@ function CandidateRankings({ jobId }: { jobId: number }) {
                 min="0"
                 max="100"
                 value={minScore}
-                onChange={(e) => setMinScore(Number(e.target.value))}
+                onChange={(e) => {
+                  setMinScore(Number(e.target.value));
+                  setPage(0);
+                }}
                 style={{ width: 200 }}
               />
             </div>
+            <span className="text-xs text-muted">
+              {pool.totalElements} candidate{pool.totalElements === 1 ? '' : 's'}
+            </span>
           </div>
 
-          {filtered.length === 0 ? (
+          {rows.length === 0 ? (
             <EmptyState
               title="No candidates match"
-              message="Lower the minimum score filter, or wait for more students to complete their profiles."
+              message={
+                pool.totalElements === 0
+                  ? 'No students have been scored for this job yet — they need complete profiles.'
+                  : 'Lower the minimum score filter to see more candidates.'
+              }
             />
           ) : (
-            <div className="table-wrap">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Rank</th>
-                    <th>Candidate</th>
-                    <th>Skills</th>
-                    <th>CGPA</th>
-                    <th>Projects</th>
-                    <th>Certs</th>
-                    <th>Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((candidate) => (
-                    <tr key={candidate.studentId}>
-                      <td className="text-strong">#{candidate.rank}</td>
-                      <td className="text-strong">{candidate.studentName}</td>
-                      <td>
-                        <ScoreBar label="Skills" value={candidate.skillScore} />
-                      </td>
-                      <td>
-                        <ScoreBar label="CGPA" value={candidate.cgpaScore} />
-                      </td>
-                      <td>
-                        <ScoreBar label="Projects" value={candidate.projectScore} />
-                      </td>
-                      <td>
-                        <ScoreBar label="Certs" value={candidate.certificationScore} />
-                      </td>
-                      <td>
-                        <span className="text-strong" style={{ color: scoreColor(candidate.totalScore) }}>
-                          {candidate.totalScore.toFixed(1)}
-                        </span>
-                      </td>
+            <>
+              <div className="table-wrap">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Rank</th>
+                      <th>Candidate</th>
+                      <th>Skills</th>
+                      <th>CGPA</th>
+                      <th>Projects</th>
+                      <th>Certs</th>
+                      <th>Total</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {rows.map((candidate) => (
+                      <tr key={candidate.studentId}>
+                        <td className="text-strong">#{candidate.rank}</td>
+                        <td className="text-strong">{candidate.studentName}</td>
+                        <td>
+                          <ScoreBar label="Skills" value={candidate.skillScore} />
+                        </td>
+                        <td>
+                          <ScoreBar label="CGPA" value={candidate.cgpaScore} />
+                        </td>
+                        <td>
+                          <ScoreBar label="Projects" value={candidate.projectScore} />
+                        </td>
+                        <td>
+                          <ScoreBar label="Certs" value={candidate.certificationScore} />
+                        </td>
+                        <td>
+                          <span className="text-strong" style={{ color: scoreColor(candidate.totalScore) }}>
+                            {candidate.totalScore.toFixed(1)}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {pool.totalPages > 1 && (
+                <div style={{ display: 'flex', gap: 'var(--sp-3)', alignItems: 'center', marginTop: 'var(--sp-4)' }}>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    disabled={page === 0}
+                    onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  >
+                    ← Previous
+                  </button>
+                  <span className="text-sm text-muted">
+                    Page {pool.page + 1} of {pool.totalPages}
+                  </span>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    disabled={page >= pool.totalPages - 1}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    Next →
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </>
       ) : (

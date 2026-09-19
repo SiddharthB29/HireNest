@@ -4,10 +4,10 @@ import { StudentProfileModal } from '../../components/StudentProfileModal';
 import { ErrorBanner, LoadingBlock } from '../../components/States';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { useAsyncData } from '../../hooks/useAsyncData';
+import { useMyStudent } from '../../hooks/useMyStudent';
 import { STUDENT_LINKS } from '../../lib/navLinks';
-import * as api from '../../services/mockApi';
 import type { StudentInput } from '../../types';
+import * as api from '../../services/apiClient';
 
 export function StudentProfilePage() {
   return (
@@ -18,11 +18,11 @@ export function StudentProfilePage() {
 }
 
 function StudentProfile() {
-  const { user } = useAuth();
+  const { refreshSession } = useAuth();
   const { showToast } = useToast();
+  const { myStudent, loading, error, reload } = useMyStudent();
   const [editing, setEditing] = useState(false);
-
-  const { data, loading, error, reload } = useAsyncData(() => api.getStudents(), []);
+  const [creating, setCreating] = useState(false);
 
   if (loading) {
     return (
@@ -33,18 +33,24 @@ function StudentProfile() {
     );
   }
 
-  if (error || !data) {
-    return <ErrorBanner message={error ?? 'Failed to load'} onRetry={reload} />;
+  if (error) {
+    return <ErrorBanner message={error} onRetry={reload} />;
   }
-
-  const myStudent =
-    data.find((s) => s.name.toLowerCase().startsWith(user?.userName.toLowerCase() ?? '')) ?? data[0];
 
   async function handleSave(input: StudentInput) {
     if (!myStudent) return;
     await api.updateStudent(myStudent.id, input);
     setEditing(false);
     showToast('success', 'Profile updated');
+    reload();
+  }
+
+  async function handleCreate(input: StudentInput) {
+    await api.createStudent(input);
+    // Re-issue the token so the fresh studentId claim is in the session.
+    await refreshSession();
+    setCreating(false);
+    showToast('success', 'Profile created');
     reload();
   }
 
@@ -114,7 +120,15 @@ function StudentProfile() {
           </section>
         </div>
       ) : (
-        <ErrorBanner message="Profile not found. Complete your profile to get started." />
+        <section className="card card-pad">
+          <h2 style={{ marginTop: 0 }}>No profile yet</h2>
+          <p className="text-sm text-muted" style={{ marginBottom: 'var(--sp-4)' }}>
+            Create your profile to appear in recruiter candidate pools and to apply to jobs.
+          </p>
+          <button className="btn btn-primary" onClick={() => setCreating(true)}>
+            Create my profile
+          </button>
+        </section>
       )}
 
       {editing && myStudent && (
@@ -123,6 +137,14 @@ function StudentProfile() {
           initial={myStudent}
           onClose={() => setEditing(false)}
           onSave={handleSave}
+        />
+      )}
+
+      {creating && (
+        <StudentProfileModal
+          title="Create your profile"
+          onClose={() => setCreating(false)}
+          onSave={handleCreate}
         />
       )}
     </>

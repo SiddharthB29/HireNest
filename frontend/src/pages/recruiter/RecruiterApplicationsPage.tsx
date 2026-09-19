@@ -4,13 +4,23 @@ import { EmptyState, ErrorBanner, LoadingBlock } from '../../components/States';
 import { useToast } from '../../context/ToastContext';
 import { useAsyncData } from '../../hooks/useAsyncData';
 import { formatDate, statusBadgeClass } from '../../lib/format';
-import * as api from '../../services/mockApi';
+import * as api from '../../services/apiClient';
 import type { Application, ApplicationStatus } from '../../types';
 import { RECRUITER_LINKS } from '../../lib/navLinks';
 
-const COMPANY_ID = 1;
-
 const FILTERS: Array<ApplicationStatus | 'ALL'> = ['ALL', 'APPLIED', 'SHORTLISTED', 'SELECTED', 'REJECTED'];
+
+/** Backend-valid transitions: APPLIED → SHORTLISTED/REJECTED; SHORTLISTED → SELECTED/REJECTED. */
+function nextActions(status: ApplicationStatus): ApplicationStatus[] {
+  switch (status) {
+    case 'APPLIED':
+      return ['SHORTLISTED', 'REJECTED'];
+    case 'SHORTLISTED':
+      return ['SELECTED', 'REJECTED'];
+    default:
+      return [];
+  }
+}
 
 export function RecruiterApplicationsPage() {
   return (
@@ -25,6 +35,8 @@ function RecruiterApplications() {
   const [filter, setFilter] = useState<ApplicationStatus | 'ALL'>('ALL');
   const [updatingId, setUpdatingId] = useState<number | null>(null);
 
+  // GET /api/applications is scoped server-side: a recruiter receives only
+  // their own company's applications.
   const { data, loading, error, reload } = useAsyncData(() => api.getApplications(), []);
 
   if (loading) {
@@ -40,8 +52,7 @@ function RecruiterApplications() {
     return <ErrorBanner message={error ?? 'Failed to load'} onRetry={reload} />;
   }
 
-  const myApps = data.filter((a) => a.companyId === COMPANY_ID);
-  const visible = filter === 'ALL' ? myApps : myApps.filter((a) => a.status === filter);
+  const visible = filter === 'ALL' ? data : data.filter((a) => a.status === filter);
 
   async function handleStatus(app: Application, status: ApplicationStatus) {
     setUpdatingId(app.id);
@@ -104,34 +115,17 @@ function RecruiterApplications() {
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: 'var(--sp-2)', flexWrap: 'wrap' }}>
-                      {app.status !== 'SHORTLISTED' && app.status !== 'SELECTED' && (
+                      {nextActions(app.status).map((status) => (
                         <button
-                          className="btn btn-secondary btn-sm"
+                          key={status}
+                          className={`btn btn-sm ${status === 'SELECTED' ? 'btn-primary' : status === 'REJECTED' ? 'btn-ghost' : 'btn-secondary'}`}
+                          style={status === 'REJECTED' ? { color: 'var(--error-text)' } : undefined}
                           disabled={updatingId === app.id}
-                          onClick={() => handleStatus(app, 'SHORTLISTED')}
+                          onClick={() => handleStatus(app, status)}
                         >
-                          Shortlist
+                          {status === 'SHORTLISTED' ? 'Shortlist' : status === 'SELECTED' ? 'Select' : 'Reject'}
                         </button>
-                      )}
-                      {app.status !== 'SELECTED' && (
-                        <button
-                          className="btn btn-primary btn-sm"
-                          disabled={updatingId === app.id}
-                          onClick={() => handleStatus(app, 'SELECTED')}
-                        >
-                          Select
-                        </button>
-                      )}
-                      {app.status !== 'REJECTED' && (
-                        <button
-                          className="btn btn-ghost btn-sm"
-                          style={{ color: 'var(--error-text)' }}
-                          disabled={updatingId === app.id}
-                          onClick={() => handleStatus(app, 'REJECTED')}
-                        >
-                          Reject
-                        </button>
-                      )}
+                      ))}
                     </div>
                   </td>
                 </tr>

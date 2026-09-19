@@ -5,7 +5,7 @@ import { EmptyState, ErrorBanner, LoadingBlock } from '../../components/States';
 import { Modal } from '../../components/Modal';
 import { useToast } from '../../context/ToastContext';
 import { useAsyncData } from '../../hooks/useAsyncData';
-import * as api from '../../services/mockApi';
+import * as api from '../../services/apiClient';
 import type { Company } from '../../types';
 import { ADMIN_LINKS } from '../../lib/navLinks';
 

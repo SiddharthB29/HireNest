@@ -5,10 +5,14 @@ import { SiteFooter } from '../components/SiteFooter';
 import { EmptyState, ErrorBanner, LoadingBlock } from '../components/States';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { formatSalary } from '../lib/format';
-import * as api from '../services/mockApi';
+import * as api from '../services/apiClient';
 import type { Job } from '../types';
 
-const JOB_TYPES = ['All', 'Full-time', 'Internship'];
+const JOB_TYPES: Array<{ value: string; label: string }> = [
+  { value: 'All', label: 'All types' },
+  { value: 'FULL_TIME', label: 'Full-time' },
+  { value: 'INTERNSHIP', label: 'Internship' },
+];
 
 export function JobsPage() {
   const { data, loading, error, reload } = useAsyncData(() => api.getJobs(), []);
@@ -26,7 +30,7 @@ export function JobsPage() {
         job.title.toLowerCase().includes(q) ||
         job.companyName.toLowerCase().includes(q) ||
         job.location.toLowerCase().includes(q) ||
-        job.requiredSkills.some((s) => s.toLowerCase().includes(q));
+        job.requiredSkills?.some((s) => s.toLowerCase().includes(q));
       const matchesType = jobType === 'All' || job.jobType === jobType;
       const matchesCgpa = job.minimumCgpa >= minCgpa;
       return matchesSearch && matchesType && matchesCgpa;
@@ -62,8 +66,8 @@ export function JobsPage() {
                 onChange={(e) => setJobType(e.target.value)}
               >
                 {JOB_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {t === 'All' ? 'All types' : t}
+                  <option key={t.value} value={t.value}>
+                    {t.label}
                   </option>
                 ))}
               </select>
@@ -144,13 +148,13 @@ export function JobCard({ job }: { job: Job }) {
       </div>
 
       <div className="skills-row">
-        {job.requiredSkills.slice(0, 4).map((skill) => (
+        {(job.requiredSkills ?? []).slice(0, 4).map((skill) => (
           <span key={skill} className="badge badge-neutral">
             {skill}
           </span>
         ))}
-        {job.requiredSkills.length > 4 && (
-          <span className="badge badge-neutral">+{job.requiredSkills.length - 4}</span>
+        {(job.requiredSkills ?? []).length > 4 && (
+          <span className="badge badge-neutral">+{(job.requiredSkills ?? []).length - 4}</span>
         )}
       </div>
 

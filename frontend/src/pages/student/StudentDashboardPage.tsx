@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DashboardLayout } from '../../components/DashboardLayout';
 import { StudentProfileModal } from '../../components/StudentProfileModal';
-import { EmptyState, ErrorBanner, LoadingBlock } from '../../components/States';
+import { ErrorBanner, LoadingBlock } from '../../components/States';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { useAsyncData } from '../../hooks/useAsyncData';
+import { useMyStudent } from '../../hooks/useMyStudent';
 import { STUDENT_LINKS } from '../../lib/navLinks';
 import { statusBadgeClass, formatDate } from '../../lib/format';
-import * as api from '../../services/mockApi';
-import type { Application, StudentInput } from '../../types';
+import type { StudentInput } from '../../types';
+import * as api from '../../services/apiClient';
 
 export function StudentDashboardPage() {
   return (
@@ -20,13 +20,11 @@ export function StudentDashboardPage() {
 }
 
 function StudentOverview() {
-  const { user } = useAuth();
+  const { refreshSession } = useAuth();
   const { showToast } = useToast();
-  const { data, loading, error, reload } = useAsyncData(
-    () => Promise.all([api.getApplications(), api.getStudents()]),
-    [],
-  );
+  const { myStudent, myApplications, loading, error, reload } = useMyStudent();
 
+  const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState(false);
 
   if (loading) {
@@ -38,21 +36,21 @@ function StudentOverview() {
     );
   }
 
-  if (error || !data) {
-    return <ErrorBanner message={error ?? 'Failed to load'} onRetry={reload} />;
+  if (error) {
+    return <ErrorBanner message={error} onRetry={reload} />;
   }
 
-  const [applications, students] = data;
+  const selected = myApplications.filter((a) => a.status === 'SELECTED').length;
+  const active = myApplications.filter((a) => a.status === 'APPLIED' || a.status === 'SHORTLISTED').length;
 
-  // A student's profile is looked up by username convention in the mock;
-  // when wiring the real API this becomes the session student id.
-  const myStudent =
-    students.find((s) => s.name.toLowerCase().startsWith(user?.userName.toLowerCase() ?? '')) ??
-    students[0];
-
-  const myApps = applications.filter((a) => a.studentId === myStudent?.id);
-  const selected = myApps.filter((a) => a.status === 'SELECTED').length;
-  const active = myApps.filter((a) => a.status === 'APPLIED' || a.status === 'SHORTLISTED').length;
+  async function handleCreateProfile(input: StudentInput) {
+    await api.createStudent(input);
+    // Re-issue the token so the fresh studentId claim is in the session.
+    await refreshSession();
+    setCreating(false);
+    showToast('success', 'Profile created — you can now apply to jobs!');
+    reload();
+  }
 
   async function handleSaveProfile(input: StudentInput) {
     if (!myStudent) return;
@@ -64,12 +62,27 @@ function StudentOverview() {
 
   return (
     <>
-      <h1 className="page-title">Welcome back, {myStudent?.name.split(' ')[0] ?? user?.userName} 👋</h1>
+      <h1 className="page-title">
+        Welcome back, {myStudent?.name.split(' ')[0] ?? 'student'} 👋
+      </h1>
       <p className="page-subtitle">Here&apos;s where your placement journey stands.</p>
+
+      {!myStudent && (
+        <section className="card card-pad" style={{ marginBottom: 'var(--sp-6)' }}>
+          <h2 style={{ marginTop: 0 }}>Complete your profile to get started</h2>
+          <p className="text-sm text-muted" style={{ marginBottom: 'var(--sp-4)' }}>
+            Your account exists, but recruiters can&apos;t see you — and the placement engine
+            can&apos;t rank you — until your profile has your details. It takes a minute.
+          </p>
+          <button className="btn btn-primary" onClick={() => setCreating(true)}>
+            Create my profile
+          </button>
+        </section>
+      )}
 
       <div className="stat-cards" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
         <div className="card stat-card-tile">
-          <span className="stat-value">{myApps.length}</span>
+          <span className="stat-value">{myApplications.length}</span>
           <span className="stat-label">Total applications</span>
         </div>
         <div className="card stat-card-tile">
@@ -91,19 +104,13 @@ function StudentOverview() {
             </Link>
           </div>
           <div className="panel-body">
-            {myApps.length === 0 ? (
-              <EmptyState
-                title="No applications yet"
-                message="Browse open roles and apply to your first opportunity."
-                action={
-                  <Link to="/jobs" className="btn btn-primary btn-sm">
-                    Browse jobs
-                  </Link>
-                }
-              />
+            {myApplications.length === 0 ? (
+              <p className="text-sm text-muted" style={{ margin: 0 }}>
+                No applications yet — browse open roles to get started.
+              </p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
-                {myApps.slice(0, 4).map((app: Application) => (
+                {myApplications.slice(0, 4).map((app) => (
                   <div
                     key={app.id}
                     style={{
@@ -134,9 +141,11 @@ function StudentOverview() {
         <section className="card panel" style={{ marginBottom: 0 }}>
           <div className="panel-head">
             <h2>My profile</h2>
-            <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}>
-              Edit profile
-            </button>
+            {myStudent && (
+              <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}>
+                Edit profile
+              </button>
+            )}
           </div>
           <div className="panel-body">
             {myStudent ? (
@@ -161,19 +170,21 @@ function StudentOverview() {
                 </dd>
               </dl>
             ) : (
-              <EmptyState
-                title="Profile incomplete"
-                message="Add your details so recruiters can find and rank you."
-                action={
-                  <button className="btn btn-primary btn-sm" onClick={() => setEditing(true)}>
-                    Complete profile
-                  </button>
-                }
-              />
+              <p className="text-sm text-muted" style={{ margin: 0 }}>
+                Profile not created yet.
+              </p>
             )}
           </div>
         </section>
       </div>
+
+      {creating && (
+        <StudentProfileModal
+          title="Create your profile"
+          onClose={() => setCreating(false)}
+          onSave={handleCreateProfile}
+        />
+      )}
 
       {editing && myStudent && (
         <StudentProfileModal

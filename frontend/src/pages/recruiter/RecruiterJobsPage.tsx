@@ -5,13 +5,12 @@ import { DashboardLayout } from '../../components/DashboardLayout';
 import { EmptyState, ErrorBanner, LoadingBlock } from '../../components/States';
 import { Modal } from '../../components/Modal';
 import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
 import { useAsyncData } from '../../hooks/useAsyncData';
 import { formatSalary } from '../../lib/format';
-import * as api from '../../services/mockApi';
+import * as api from '../../services/apiClient';
 import type { Job, JobInput } from '../../types';
 import { RECRUITER_LINKS } from '../../lib/navLinks';
-
-const COMPANY_ID = 1;
 
 const EMPTY_JOB: JobInput = {
   title: '',
@@ -37,6 +36,8 @@ export function RecruiterJobsPage() {
 
 function RecruiterJobs() {
   const { showToast } = useToast();
+  const { user } = useAuth();
+  const companyId = user?.companyId ?? null;
   const { data, loading, error, reload } = useAsyncData(() => api.getJobs(), []);
   const [modal, setModal] = useState<{ mode: 'create' } | { mode: 'edit'; job: Job } | null>(null);
   const [deleting, setDeleting] = useState<Job | null>(null);
@@ -55,7 +56,7 @@ function RecruiterJobs() {
     return <ErrorBanner message={error ?? 'Failed to load'} onRetry={reload} />;
   }
 
-  const myJobs = data.filter((j) => j.companyId === COMPANY_ID);
+  const myJobs = data.filter((j) => j.companyId === companyId);
 
   async function handleDelete() {
     if (!deleting) return;
@@ -147,8 +148,11 @@ function RecruiterJobs() {
           initial={modal.mode === 'edit' ? modal.job : undefined}
           onClose={() => setModal(null)}
           onSave={async (input) => {
+            if (!companyId) {
+              throw new Error('Your account is not linked to a company yet.');
+            }
             if (modal.mode === 'create') {
-              await api.createJob(COMPANY_ID, input);
+              await api.createJob(companyId, input);
               showToast('success', 'Job posted');
             } else {
               await api.updateJob(modal.job.id, input);
@@ -197,20 +201,19 @@ function JobFormModal({
   onSave: (input: JobInput) => Promise<void>;
 }) {
   const [form, setForm] = useState<JobInput>(
-    initial
-      ? {
-          title: initial.title,
-          description: initial.description,
-          location: initial.location,
-          salary: initial.salary,
-          minimumCgpa: initial.minimumCgpa,
-          maximumBacklogs: initial.maximumBacklogs,
-          requiredSkills: [...initial.requiredSkills],
-          preferredSkills: [...initial.preferredSkills],
-          allowedBranches: [...initial.allowedBranches],
-          graduationYear: initial.graduationYear,
-          jobType: initial.jobType,
-        }
+    initial        ? {
+            title: initial.title,
+            description: initial.description,
+            location: initial.location,
+            salary: initial.salary,
+            minimumCgpa: initial.minimumCgpa,
+            maximumBacklogs: initial.maximumBacklogs,
+            requiredSkills: [...(initial.requiredSkills ?? [])],
+            preferredSkills: [...(initial.preferredSkills ?? [])],
+            allowedBranches: [...(initial.allowedBranches ?? [])],
+            graduationYear: initial.graduationYear,
+            jobType: initial.jobType === 'FULL_TIME' ? 'Full-time' : initial.jobType === 'INTERNSHIP' ? 'Internship' : initial.jobType,
+          }
       : EMPTY_JOB,
   );
   const [saving, setSaving] = useState(false);
@@ -274,7 +277,9 @@ function JobFormModal({
             <label htmlFor="jf-type">Job type</label>
             <select id="jf-type" className="select" value={form.jobType} onChange={(e) => update('jobType', e.target.value)}>
               {['Full-time', 'Internship'].map((t) => (
-                <option key={t}>{t}</option>
+                <option key={t} value={t}>
+                  {t}
+                </option>
               ))}
             </select>
           </div>

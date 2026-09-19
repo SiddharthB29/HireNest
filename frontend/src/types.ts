@@ -1,7 +1,6 @@
 /**
  * HireNest domain types.
- * Shapes intentionally mirror the Spring Boot backend DTOs/entities so the
- * mock API layer can later be swapped for real fetch calls with minimal churn.
+ * Shapes mirror the Spring Boot backend DTOs/entities served by /api.
  */
 
 export type Role = 'STUDENT' | 'RECRUITER' | 'ADMIN';
@@ -12,6 +11,11 @@ export interface User {
   id: number;
   userName: string;
   role: Role;
+  /** Set when the account is linked to a student profile (from JWT claims). */
+  studentId?: number;
+  /** Set for recruiter accounts (from JWT claims). */
+  companyId?: number;
+  companyName?: string;
 }
 
 export interface Company {
@@ -30,9 +34,10 @@ export interface Job {
   salary: number;
   minimumCgpa: number;
   maximumBacklogs: number;
-  requiredSkills: string[];
-  preferredSkills: string[];
-  allowedBranches: string[];
+  /** Collections are optional: some backend versions/rows omit them. */
+  requiredSkills?: string[];
+  preferredSkills?: string[];
+  allowedBranches?: string[];
   graduationYear: number | null;
   jobType: string;
   companyId: number;
@@ -65,6 +70,13 @@ export interface Application {
   companyName: string;
 }
 
+/** GET /api/jobs/{jobId}/eligibility/{studentId} — placement engine verdict. */
+export interface EligibilityResult {
+  eligible: boolean;
+  /** Criterion codes: CGPA, BACKLOGS, BRANCH, SKILLS, GRADUATION_YEAR. */
+  failedCriteria: string[];
+}
+
 export interface CandidateRanking {
   rank: number;
   studentId: number;
@@ -83,10 +95,21 @@ export interface PlacementEvaluation {
   reasons: string[];
 }
 
-/** Job creation/update payload sent by recruiter & admin forms. */
-export type JobInput = Omit<Job, 'id' | 'companyId' | 'companyName'> & {
+/** Job creation/update payload sent by recruiter & admin forms (collections required). */
+export interface JobInput {
+  title: string;
+  description: string;
+  location: string;
+  salary: number;
+  minimumCgpa: number;
+  maximumBacklogs: number;
+  requiredSkills: string[];
+  preferredSkills: string[];
+  allowedBranches: string[];
+  graduationYear: number | null;
+  jobType: string;
   companyId?: number;
-};
+}
 
 /** Student profile creation/update payload. */
 export type StudentInput = Omit<Student, 'id'>;
@@ -97,4 +120,32 @@ export interface PageResponse<T> {
   totalPages: number;
   page: number;
   size: number;
+}
+
+/* ---------- Auth contract (Spring Boot /api/auth) ---------- */
+
+/** POST /api/auth/login returns the raw JWT string, not a JSON object. */
+export type LoginResponse = string;
+
+/** POST /api/auth/register response body (no token — clients log in afterwards). */
+export interface AuthResponse {
+  id: number;
+  userName: string;
+  role: Role;
+}
+
+/** Standard error body produced by the backend's GlobalExceptionHandler. */
+export interface ErrorResponse {
+  status: number;
+  message: string;
+  timestamp: string;
+}
+
+/** Lightweight account summary (admin recruiter listings). */
+export interface UserSummary {
+  id: number;
+  userName: string;
+  role: Role;
+  companyId: number | null;
+  companyName: string | null;
 }

@@ -3,7 +3,7 @@ import { DashboardLayout } from '../../components/DashboardLayout';
 import { EmptyState, ErrorBanner, LoadingBlock } from '../../components/States';
 import { useAsyncData } from '../../hooks/useAsyncData';
 import { formatDate, statusBadgeClass } from '../../lib/format';
-import * as api from '../../services/mockApi';
+import * as api from '../../services/apiClient';
 import type { ApplicationStatus } from '../../types';
 import { ADMIN_LINKS } from '../../lib/navLinks';
 

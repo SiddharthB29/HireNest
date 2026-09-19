@@ -2,11 +2,9 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DashboardLayout } from '../../components/DashboardLayout';
 import { EmptyState, ErrorBanner, LoadingBlock } from '../../components/States';
-import { useAuth } from '../../context/AuthContext';
-import { useAsyncData } from '../../hooks/useAsyncData';
+import { useMyStudent } from '../../hooks/useMyStudent';
 import { STUDENT_LINKS } from '../../lib/navLinks';
 import { formatDate, statusBadgeClass } from '../../lib/format';
-import * as api from '../../services/mockApi';
 import type { ApplicationStatus } from '../../types';
 
 const FILTERS: Array<ApplicationStatus | 'ALL'> = ['ALL', 'APPLIED', 'SHORTLISTED', 'SELECTED', 'REJECTED'];
@@ -20,13 +18,8 @@ export function StudentApplicationsPage() {
 }
 
 function StudentApplications() {
-  const { user } = useAuth();
   const [filter, setFilter] = useState<ApplicationStatus | 'ALL'>('ALL');
-
-  const { data, loading, error, reload } = useAsyncData(
-    () => Promise.all([api.getApplications(), api.getStudents()]),
-    [],
-  );
+  const { myApplications, loading, error, reload } = useMyStudent();
 
   if (loading) {
     return (
@@ -37,16 +30,11 @@ function StudentApplications() {
     );
   }
 
-  if (error || !data) {
-    return <ErrorBanner message={error ?? 'Failed to load'} onRetry={reload} />;
+  if (error) {
+    return <ErrorBanner message={error} onRetry={reload} />;
   }
 
-  const [applications, students] = data;
-  const myStudent =
-    students.find((s) => s.name.toLowerCase().startsWith(user?.userName.toLowerCase() ?? '')) ??
-    students[0];
-  const myApps = applications.filter((a) => a.studentId === myStudent?.id);
-  const visible = filter === 'ALL' ? myApps : myApps.filter((a) => a.status === filter);
+  const visible = filter === 'ALL' ? myApplications : myApplications.filter((a) => a.status === filter);
 
   return (
     <>

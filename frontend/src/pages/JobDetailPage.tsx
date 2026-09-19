@@ -7,7 +7,8 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { formatSalary } from '../lib/format';
-import * as api from '../services/mockApi';
+import type { EligibilityResult } from '../types';
+import * as api from '../services/apiClient';
 
 export function JobDetailPage() {
   const { jobId } = useParams<{ jobId: string }>();
@@ -18,10 +19,20 @@ export function JobDetailPage() {
   const navigate = useNavigate();
 
   const job = useAsyncData(() => api.getJobById(id), [id]);
-  const applications = useAsyncData(() => api.getApplications(), []);
-  const students = useAsyncData(
-    () => (user ? api.getStudents() : Promise.resolve([])),
-    [user?.userName],
+  const applications = useAsyncData(
+    () => (user ? api.getApplications() : Promise.resolve([])),
+    [],
+  );
+
+  // Live verdict from the placement engine — only for students whose
+  // account is linked to a profile. Other roles/visitors never fetch it.
+  const isStudentWithProfile = user?.role === 'STUDENT' && user.studentId !== undefined;
+  const eligibility = useAsyncData<EligibilityResult | null>(
+    () =>
+      isStudentWithProfile
+        ? api.checkEligibility(id, user.studentId as number)
+        : Promise.resolve(null),
+    [id, user?.id, user?.studentId],
   );
 
   const [applying, setApplying] = useState(false);
@@ -50,13 +61,19 @@ export function JobDetailPage() {
     );
   }
 
-  const jobData = job.data;
+  // Tolerate backends/rows missing optional collection fields — a missing
+  // array must degrade to "empty", never crash the page.
+  const jobData = {
+    ...job.data,
+    requiredSkills: job.data.requiredSkills ?? [],
+    preferredSkills: job.data.preferredSkills ?? [],
+    allowedBranches: job.data.allowedBranches ?? [],
+  };
 
-  // In the mock, the demo student maps to the first profile; when wiring the
-  // real API the session student id comes from the JWT.
-  const myStudent = user?.role === 'STUDENT' ? students.data?.[0] : undefined;
+  // The session's student id comes from the JWT claims (set at login).
+  const myStudentId = user?.role === 'STUDENT' ? user.studentId : undefined;
   const myApplication = applications.data?.find(
-    (a) => a.jobId === id && myStudent && a.studentId === myStudent.id,
+    (a) => a.jobId === id && myStudentId !== undefined && a.studentId === myStudentId,
   );
 
   async function handleApply() {
@@ -64,14 +81,16 @@ export function JobDetailPage() {
       navigate('/login', { state: { from: `/jobs/${id}` } });
       return;
     }
-    if (user.role !== 'STUDENT' || !myStudent) {
+    if (user.role !== 'STUDENT') {
       showToast('info', 'Only student accounts can apply to jobs.');
       return;
     }
 
     setApplying(true);
     try {
-      await api.applyToJob(id, myStudent.id);
+      // Server resolves the student from the session and enforces
+      // eligibility + duplicate checks (409 with a message otherwise).
+      await api.applyToJob(id);
       showToast('success', `Application submitted for ${jobData.title}`);
       applications.reload();
     } catch (err) {
@@ -81,7 +100,8 @@ export function JobDetailPage() {
     }
   }
 
-  const isOwner = user && (user.role === 'ADMIN' || (user.role === 'RECRUITER' && user.userName === 'recruiter'));
+  const isOwner =
+    user && (user.role === 'ADMIN' || (user.role === 'RECRUITER' && user.companyId === jobData.companyId));
 
   return (
     <Shell>
@@ -195,6 +215,7 @@ export function JobDetailPage() {
                 </div>
               )}
             </dl>
+            <EligibilityVerdict eligibility={eligibility} />
           </section>
 
           <section className="panel" style={{ marginBottom: 0 }}>
@@ -223,6 +244,54 @@ function statusClass(status: string): string {
     default:
       return 'badge-neutral';
   }
+}
+
+/** Backend criterion codes → what they mean for the student. */
+const CRITERION_TEXT: Record<string, string> = {
+  CGPA: 'CGPA is below the cut-off',
+  BACKLOGS: 'Too many active backlogs',
+  BRANCH: 'Your branch is not in the allowed list',
+  SKILLS: 'Missing one or more required skills',
+  GRADUATION_YEAR: 'Graduation year does not match',
+};
+
+function EligibilityVerdict({
+  eligibility,
+}: {
+  eligibility: ReturnType<typeof useAsyncData<EligibilityResult | null>>;
+}) {
+  // Hidden for visitors/recruiters/admins, while loading, and if the check
+  // fails — the server re-enforces everything at apply time regardless.
+  if (eligibility.loading || eligibility.error || !eligibility.data) return null;
+
+  const { eligible, failedCriteria } = eligibility.data;
+
+  if (eligible) {
+    return (
+      <p
+        className="badge badge-success"
+        style={{ display: 'inline-block', marginTop: 'var(--sp-4)' }}
+      >
+        ✓ You meet every requirement for this role
+      </p>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: 'var(--sp-4)' }}>
+      <p className="text-sm text-strong" style={{ marginBottom: 'var(--sp-2)' }}>
+        Not eligible yet:
+      </p>
+      <ul
+        className="text-sm text-muted"
+        style={{ margin: 0, paddingLeft: '1.25rem', display: 'grid', gap: 'var(--sp-1)' }}
+      >
+        {failedCriteria.map((criterion) => (
+          <li key={criterion}>{CRITERION_TEXT[criterion] ?? criterion}</li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
 function Shell({ children }: { children: React.ReactNode }) {

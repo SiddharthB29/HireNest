@@ -55,6 +55,21 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/admin/recruiters")
                         .hasRole("ADMIN")
 
+                        .requestMatchers(HttpMethod.GET, "/api/auth/admin/recruiters")
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.POST, "/api/auth/refresh-token")
+                        .authenticated()
+
+                        // Public job browsing: the listing and single-job detail
+                        // are readable without login; deeper paths (company jobs,
+                        // eligibility) stay authenticated via the /** rule below.
+                        .requestMatchers(HttpMethod.GET, "/api/jobs")
+                        .permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/api/jobs/*")
+                        .permitAll()
+
                         .requestMatchers(HttpMethod.GET, "/api/jobs/**")
                         .hasAnyRole("STUDENT", "RECRUITER", "ADMIN")
 

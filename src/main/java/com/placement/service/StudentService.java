@@ -123,6 +123,8 @@ public class StudentService {
             existingStudent.setGraduationYear(student.getGraduationYear());
             existingStudent.setBacklogs(student.getBacklogs());
             existingStudent.setSkills(student.getSkills());
+            existingStudent.setProjectCount(student.getProjectCount());
+            existingStudent.setCertificationCount(student.getCertificationCount());
 
             return studentRepository.save(existingStudent);
         }
@@ -151,6 +153,8 @@ public class StudentService {
         existingStudent.setGraduationYear(student.getGraduationYear());
         existingStudent.setBacklogs(student.getBacklogs());
         existingStudent.setSkills(student.getSkills());
+        existingStudent.setProjectCount(student.getProjectCount());
+        existingStudent.setCertificationCount(student.getCertificationCount());
 
         return studentRepository.save(existingStudent);
     }

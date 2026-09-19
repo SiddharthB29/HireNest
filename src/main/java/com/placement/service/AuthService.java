@@ -3,6 +3,7 @@ package com.placement.service;
 import com.placement.dto.AdminRecruiterRequest;
 import com.placement.dto.LoginRequest;
 import com.placement.dto.RegisterRequest;
+import com.placement.dto.UserSummaryResponse;
 import com.placement.entity.Company;
 import com.placement.entity.Role;
 import com.placement.entity.User;
@@ -17,6 +18,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @Service
 public class AuthService {
@@ -132,6 +135,39 @@ public class AuthService {
             );
         }
 
-        return jwtService.generateToken(user.getUsername());
+        return jwtService.generateToken(user);
+    }
+
+    /**
+     * Issues a fresh token for the caller so the frontend can pick up new
+     * claims (e.g. a student link created after the original login) without
+     * forcing a re-login.
+     */
+    public String refreshToken() {
+        User user = getAuthenticatedUser();
+        return jwtService.generateToken(user);
+    }
+
+    /** Admin-only listing of recruiter accounts. */
+    public List<UserSummaryResponse> getRecruiterAccounts() {
+        User admin = getAuthenticatedUser();
+
+        if (admin.getRole() != Role.ADMIN) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Only admins can list recruiter accounts"
+            );
+        }
+
+        return userRepository.findByRole(Role.RECRUITER)
+                .stream()
+                .map(recruiter -> new UserSummaryResponse(
+                        recruiter.getId(),
+                        recruiter.getUsername(),
+                        recruiter.getRole(),
+                        recruiter.getCompany() != null ? recruiter.getCompany().getId() : null,
+                        recruiter.getCompany() != null ? recruiter.getCompany().getName() : null
+                ))
+                .toList();
     }
 }

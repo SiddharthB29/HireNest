@@ -10,6 +10,7 @@ import com.placement.dto.ErrorResponse;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -143,5 +144,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(exception.getMessage());
+    }
+
+    /** Preserves the status + reason of service-thrown ResponseStatusExceptions
+     *  (e.g. the 403s for accounts without a linked student profile/company). */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> handleResponseStatusException(
+            ResponseStatusException ex) {
+
+        String message = ex.getReason() != null ? ex.getReason() : "Request failed";
+
+        ErrorResponse errorResponse =
+                new ErrorResponse(
+                        ex.getStatusCode().value(),
+                        message
+                );
+
+        return new ResponseEntity<>(errorResponse, ex.getStatusCode());
     }
 }

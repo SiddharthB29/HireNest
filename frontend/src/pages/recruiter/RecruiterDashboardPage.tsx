@@ -4,9 +4,8 @@ import { EmptyState, ErrorBanner, LoadingBlock } from '../../components/States';
 import { useAsyncData } from '../../hooks/useAsyncData';
 import { formatSalary } from '../../lib/format';
 import { RECRUITER_LINKS } from '../../lib/navLinks';
-import * as api from '../../services/mockApi';
-
-const COMPANY_ID = 1; // Mock recruiter belongs to Nimbus Systems.
+import { useAuth } from '../../context/AuthContext';
+import * as api from '../../services/apiClient';
 
 export function RecruiterDashboardPage() {
   return (
@@ -18,10 +17,22 @@ export function RecruiterDashboardPage() {
 
 function RecruiterOverview() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const companyId = user?.companyId ?? null;
+
   const { data, loading, error, reload } = useAsyncData(
     () => Promise.all([api.getJobs(), api.getApplications()]),
     [],
   );
+
+  if (!companyId) {
+    return (
+      <>
+        <h1 className="page-title">Recruiter overview</h1>
+        <ErrorBanner message="Your account is not linked to a company yet. Ask your placement cell to link it." />
+      </>
+    );
+  }
 
   if (loading) {
     return (
@@ -37,15 +48,17 @@ function RecruiterOverview() {
   }
 
   const [jobs, applications] = data;
-  const myJobs = jobs.filter((j) => j.companyId === COMPANY_ID);
-  const myApps = applications.filter((a) => a.companyId === COMPANY_ID);
+  const myJobs = jobs.filter((j) => j.companyId === companyId);
+  const myApps = applications.filter((a) => a.companyId === companyId);
   const shortlisted = myApps.filter((a) => a.status === 'SHORTLISTED').length;
   const selected = myApps.filter((a) => a.status === 'SELECTED').length;
 
   return (
     <>
       <h1 className="page-title">Recruiter overview</h1>
-      <p className="page-subtitle">Your company&apos;s hiring pipeline at a glance.</p>
+      <p className="page-subtitle">
+        {user?.companyName ? `${user.companyName}'s hiring pipeline at a glance.` : "Your company's hiring pipeline at a glance."}
+      </p>
 
       <div className="stat-cards">
         <div className="card stat-card-tile">
