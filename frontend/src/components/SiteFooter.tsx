@@ -21,9 +21,9 @@ export function SiteFooter() {
 
         <div className="site-footer-col">
           <h4>Company</h4>
-          <a href="#about">About</a>
           <a href="#features">Features</a>
           <a href="#how-it-works">How it works</a>
+          <a href="#about">About</a>
         </div>
 
         <div className="site-footer-col">
@@ -36,6 +36,9 @@ export function SiteFooter() {
 
       <div className="container site-footer-bottom">
         <span className="text-xs text-muted">© {new Date().getFullYear()} HireNest. All rights reserved.</span>
+        <span className="text-xs text-muted">
+          <span style={{ color: 'var(--accent)' }} aria-hidden="true">✳︎</span> HireNest
+        </span>
       </div>
     </footer>
   );

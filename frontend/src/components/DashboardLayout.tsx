@@ -47,7 +47,9 @@ export function DashboardLayout({
               className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
               onClick={() => setMenuOpen(false)}
             >
-              <span aria-hidden="true">{link.icon}</span>
+              <span className="link-mark" aria-hidden="true">
+                {link.icon}
+              </span>
               {link.label}
             </NavLink>
           ))}
@@ -74,7 +76,7 @@ export function DashboardLayout({
             >
               ☰
             </button>
-            <strong className="text-strong">{title}</strong>
+            <span className="topbar-title">{title}</span>
           </div>
 
           <div className="topbar-user">
@@ -88,9 +90,7 @@ export function DashboardLayout({
           </div>
         </header>
 
-        <main className="dashboard-content page-enter">
-          {children ?? <Outlet />}
-        </main>
+        <main className="dashboard-content page-enter">{children ?? <Outlet />}</main>
       </div>
     </div>
   );

@@ -62,7 +62,7 @@ function AdminCompanies() {
             Partner companies participating in placements.
           </p>
         </div>
-        <button className="btn btn-gradient" onClick={() => setCreating(true)}>
+        <button className="btn btn-primary" onClick={() => setCreating(true)}>
           + Add company
         </button>
       </div>
@@ -84,7 +84,7 @@ function AdminCompanies() {
             return (
               <div key={company.id} className="card card-hover card-pad">
                 <div className="job-company" style={{ marginBottom: 'var(--sp-3)' }}>
-                  <span className="job-logo">{company.name.slice(0, 1)}</span>
+                  <span className="job-logo">{company.name}</span>
                   <div>
                     <div className="text-strong">{company.name}</div>
                     <div className="text-xs text-muted">{company.location}</div>
