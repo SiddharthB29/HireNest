@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { Brand } from './Brand';
 import { useAuth } from '../context/AuthContext';
 
@@ -35,7 +35,10 @@ export function DashboardLayout({
     <div className="dashboard">
       <aside className={`sidebar ${menuOpen ? 'is-open' : ''}`}>
         <div className="sidebar-head">
-          <Brand size="sm" />
+          {/* Click the HireNest symbol to leave the dashboard and go home. */}
+          <Link to="/" aria-label="HireNest home" className="sidebar-brand-link">
+            <Brand size="sm" />
+          </Link>
         </div>
 
         <nav className="sidebar-nav" aria-label={`${title} navigation`}>

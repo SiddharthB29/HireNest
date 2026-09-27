@@ -125,6 +125,11 @@ public class StudentService {
             existingStudent.setSkills(student.getSkills());
             existingStudent.setProjectCount(student.getProjectCount());
             existingStudent.setCertificationCount(student.getCertificationCount());
+            existingStudent.setResumeUrl(student.getResumeUrl());
+            existingStudent.setPortfolioUrl(student.getPortfolioUrl());
+            existingStudent.setGithubUrl(student.getGithubUrl());
+            existingStudent.setLinkedinUrl(student.getLinkedinUrl());
+            existingStudent.setCertificationsUrl(student.getCertificationsUrl());
 
             return studentRepository.save(existingStudent);
         }
@@ -155,6 +160,11 @@ public class StudentService {
         existingStudent.setSkills(student.getSkills());
         existingStudent.setProjectCount(student.getProjectCount());
         existingStudent.setCertificationCount(student.getCertificationCount());
+        existingStudent.setResumeUrl(student.getResumeUrl());
+        existingStudent.setPortfolioUrl(student.getPortfolioUrl());
+        existingStudent.setGithubUrl(student.getGithubUrl());
+        existingStudent.setLinkedinUrl(student.getLinkedinUrl());
+        existingStudent.setCertificationsUrl(student.getCertificationsUrl());
 
         return studentRepository.save(existingStudent);
     }

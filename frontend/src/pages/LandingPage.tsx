@@ -1,4 +1,6 @@
+import { useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 import { PublicNavbar } from '../components/PublicNavbar';
 import { SiteFooter } from '../components/SiteFooter';
 
@@ -61,8 +63,11 @@ const STATS = [
 ];
 
 export function LandingPage() {
+  const rootRef = useRef<HTMLDivElement>(null);
+  useScrollReveal(rootRef);
+
   return (
-    <div className="page-enter">
+    <div ref={rootRef} className="page-enter">
       <PublicNavbar />
 
       <main>
@@ -113,7 +118,7 @@ export function LandingPage() {
           <div className="container">
             <div className="stats-grid">
               {STATS.map((stat) => (
-                <div key={stat.label} className="stat-card">
+                <div key={stat.label} className="stat-card" data-reveal>
                   <div className="stat-value">{stat.value}</div>
                   <div className="stat-label">{stat.label}</div>
                 </div>
@@ -125,10 +130,10 @@ export function LandingPage() {
         {/* Features — metadata rows */}
         <section className="section" id="features">
           <div className="container">
-            <div className="section-rule">
+            <div className="section-rule" data-reveal="rule">
               <span>Experience — what HireNest does</span>
             </div>
-            <div className="section-head">
+            <div className="section-head" data-reveal>
               <h2>
                 Everything a placement season <span className="accent">needs.</span>
               </h2>
@@ -139,7 +144,7 @@ export function LandingPage() {
             </div>
             <div className="feature-rows">
               {FEATURES.map((feature, index) => (
-                <div key={feature.title} className="feature-row">
+                <div key={feature.title} className="feature-row" data-reveal>
                   <h3>
                     <span className="feature-index">{String(index + 1).padStart(2, '0')}</span>
                     {feature.title}
@@ -154,15 +159,15 @@ export function LandingPage() {
         {/* How it works — numbered rows */}
         <section className="section" id="how-it-works">
           <div className="container">
-            <div className="section-rule">
+            <div className="section-rule" data-reveal="rule">
               <span>About — how it works</span>
             </div>
-            <div className="section-head">
+            <div className="section-head" data-reveal>
               <h2>From sign-up to offer letter, in three steps.</h2>
             </div>
             <div className="step-rows">
               {STEPS.map((step, index) => (
-                <div key={step.title} className="step-row">
+                <div key={step.title} className="step-row" data-reveal>
                   <span className="step-number">{index + 1}.</span>
                   <h3>{step.title}</h3>
                   <p className="text-sm">{step.description}</p>
@@ -174,7 +179,7 @@ export function LandingPage() {
 
         {/* CTA — typographic close */}
         <section className="cta-band">
-          <div className="container">
+          <div className="container" data-reveal>
             <h2>
               Ready to simplify your placement <span className="accent">season?</span>
             </h2>

@@ -236,14 +236,8 @@ button {
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--ink-soft);
-}
-
-@media (prefers-color-scheme: dark) {
-  .btn-primary:hover:not(:disabled) {
-    background: #fffefb;
-    color: #161512;
-  }
+  background: #fffefb;
+  color: #161512;
 }
 
 .btn-secondary {
@@ -291,14 +285,8 @@ button {
 }
 
 .btn-gradient:hover:not(:disabled) {
-  background: var(--ink-soft);
-}
-
-@media (prefers-color-scheme: dark) {
-  .btn-gradient:hover:not(:disabled) {
-    background: #fffefb;
-    color: #161512;
-  }
+  background: #fffefb;
+  color: #161512;
 }
 
 /* ---------- Forms ---------- */
@@ -499,14 +487,8 @@ button {
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
   animation: skeleton-shimmer 1.4s infinite;
-}
-
-@media (prefers-color-scheme: dark) {
-  .skeleton::after {
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
-  }
 }
 
 @keyframes skeleton-shimmer {

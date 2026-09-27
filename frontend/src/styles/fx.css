@@ -1,0 +1,169 @@
+/* ============================================================
+   HireNest FX — cosmetic layer (dark theme).
+
+   Everything here is decorative: fixed/absolute, pointer-events:none,
+   and disabled for touch pointers + prefers-reduced-motion.
+   The golden expression comes from the --fx-* vars in tokens.css.
+   ============================================================ */
+
+/* ---------- Shared FX layer basics ---------- */
+
+.fx-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2; /* above bg, below navbar (100) / toasts (1000) */
+}
+
+/* Dashboard awareness: the ambient edge bloom is dimmed on dashboard pages
+   so tables, forms and modals stay readable. (The scroll progress line
+   stays at full strength.) */
+:root:has(.dashboard) .fx-ambient {
+  opacity: 0.45;
+}
+
+/* ---------- Ambient glow (screen-edge bloom) ---------- */
+
+/* Light creeping in near the screen edges — a static framing vignette. */
+.fx-ambient {
+  z-index: 1;
+  background:
+    radial-gradient(60rem 40rem at 110% -10%, rgba(var(--fx-bloom-rgb) / var(--fx-bloom-alpha)), transparent 60%),
+    radial-gradient(55rem 38rem at -10% 110%, rgba(var(--fx-bloom-rgb) / calc(var(--fx-bloom-alpha) * 0.8)), transparent 60%),
+    radial-gradient(48rem 30rem at -8% -8%, rgba(var(--fx-bloom-rgb) / calc(var(--fx-bloom-alpha) * 0.55)), transparent 60%);
+  mix-blend-mode: var(--fx-particle-blend, normal);
+}
+
+/* ---------- Scroll progress line ---------- */
+
+.fx-scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 1200; /* above navbar + toasts — it is a viewport rail */
+  pointer-events: none;
+}
+
+.fx-scroll-progress-fill {
+  height: 100%;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  opacity: 0;
+  transition: opacity 200ms var(--ease);
+  background: linear-gradient(
+    90deg,
+    rgba(var(--fx-line-rgb) / 0.5),
+    rgba(var(--fx-line-rgb) / 1)
+  );
+  box-shadow: 0 0 8px rgba(var(--fx-line-rgb) / 0.55);
+}
+
+/* ---------- Scroll-triggered reveals (landing page) ---------- */
+
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 450ms var(--ease),
+    transform 450ms var(--ease);
+  transition-delay: calc(var(--reveal-index, 0) * 50ms);
+}
+
+/* The signature scroll-triggered horizontal line: section rules are
+   *scrubbed* by scroll progress via --rule-scrub (0..1, set in JS and
+   lerped for smoothness), so the stretch is physically tied to scrolling
+   rather than playing its own transition. */
+[data-reveal='rule'] {
+  opacity: 1;
+  transform: none;
+}
+
+[data-reveal='rule']::after {
+  transform-origin: left center;
+  transform: scaleX(var(--rule-scrub, 0));
+}
+
+/* One-shot gold shimmer — sweeps once across a rule after its stretch
+   completes (`.is-shimmered` is added by the reveal hook, never loops). */
+[data-reveal='rule'].is-shimmered::after {
+  background-image:
+    linear-gradient(
+      100deg,
+      transparent 20%,
+      rgba(var(--fx-line-rgb) / 0.9) 50%,
+      transparent 80%
+    );
+  background-repeat: no-repeat;
+  background-size: 220% 100%;
+  animation: fx-rule-shimmer 900ms var(--ease) 1 both;
+}
+
+@keyframes fx-rule-shimmer {
+  from { background-position: 120% 0; }
+  to   { background-position: -20% 0; }
+}
+
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* One-shot gold shimmer across a stat card's surface — fires once after
+   the card's reveal transition finishes; subtle, readable, no loop. */
+.stat-card.is-shimmered {
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card.is-shimmered::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(var(--fx-bloom-rgb) / 0.14) 50%,
+    transparent 65%
+  );
+  transform: translateX(-120%);
+  animation: fx-card-shimmer 1100ms var(--ease) 1 both;
+}
+
+@keyframes fx-card-shimmer {
+  to { transform: translateX(120%); }
+}
+
+/* ---------- Motion & input guardrails ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  [data-reveal='rule']::after {
+    transform: scaleX(var(--rule-scrub, 1));
+  }
+
+  [data-reveal='rule'].is-shimmered::after,
+  .stat-card.is-shimmered::before {
+    animation: none;
+    background-image: none;
+  }
+
+  .fx-ambient,
+  .fx-scroll-progress {
+    display: none;
+  }
+}
+
+/* Touch devices: no ambient bloom. */
+@media (pointer: coarse) {
+  .fx-ambient {
+    display: none;
+  }
+}

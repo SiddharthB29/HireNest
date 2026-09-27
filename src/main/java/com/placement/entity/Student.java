@@ -33,6 +33,18 @@ public class Student {
 
     private Integer graduationYear;
 
+    /* Optional profile links — all nullable; Hibernate adds these columns
+       via ddl-auto=update without touching existing rows. */
+    private String resumeUrl;
+
+    private String portfolioUrl;
+
+    private String githubUrl;
+
+    private String linkedinUrl;
+
+    private String certificationsUrl;
+
     public Long getId() {
         return id;
     }
@@ -119,5 +131,45 @@ public class Student {
 
     public void setGraduationYear(Integer graduationYear) {
         this.graduationYear = graduationYear;
+    }
+
+    public String getResumeUrl() {
+        return resumeUrl;
+    }
+
+    public void setResumeUrl(String resumeUrl) {
+        this.resumeUrl = resumeUrl;
+    }
+
+    public String getPortfolioUrl() {
+        return portfolioUrl;
+    }
+
+    public void setPortfolioUrl(String portfolioUrl) {
+        this.portfolioUrl = portfolioUrl;
+    }
+
+    public String getGithubUrl() {
+        return githubUrl;
+    }
+
+    public void setGithubUrl(String githubUrl) {
+        this.githubUrl = githubUrl;
+    }
+
+    public String getLinkedinUrl() {
+        return linkedinUrl;
+    }
+
+    public void setLinkedinUrl(String linkedinUrl) {
+        this.linkedinUrl = linkedinUrl;
+    }
+
+    public String getCertificationsUrl() {
+        return certificationsUrl;
+    }
+
+    public void setCertificationsUrl(String certificationsUrl) {
+        this.certificationsUrl = certificationsUrl;
     }
 }

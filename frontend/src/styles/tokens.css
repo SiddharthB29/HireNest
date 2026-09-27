@@ -1,19 +1,19 @@
 /* ============================================================
-   HireNest Design Tokens — editorial theme
-   Inspired by award-winning editorial-minimalist portfolios:
-   warm paper background, near-black ink, hairline rules,
-   serif display type, one restrained accent.
+   HireNest Design Tokens — editorial theme (dark only)
+   Warm charcoal paper, cream ink, hairline rules, serif display
+   type, one restrained gold accent. The FX layer reads the
+   --fx-* variables (luminous gold, screen-blended on charcoal).
    ============================================================ */
 
 :root {
-  /* ---- Ink (primary action color = near-black) ---- */
-  --ink: #1a1812;
-  --ink-soft: #3d3a30;
+  /* ---- Ink (primary action color = cream) ---- */
+  --ink: #f4f1e6;
+  --ink-soft: #c9c5b6;
 
   /* ---- Single restrained accent (links, focus, ✳︎ marks) ---- */
-  --accent: #8a6a3f;         /* muted bronze */
-  --accent-strong: #6f5430;
-  --accent-tint: rgba(138, 106, 63, 0.12);
+  --accent: #c9a468;         /* luminous gold */
+  --accent-strong: #ddb87e;
+  --accent-tint: rgba(201, 164, 104, 0.14);
 
   /* ---- Warm neutrals ---- */
   --gray-50: #faf9f5;
@@ -29,29 +29,29 @@
   --gray-950: #12100c;
 
   /* ---- Semantic (muted, editorial) ---- */
-  --success: #4a7c59;
-  --success-bg: rgba(74, 124, 89, 0.1);
-  --success-text: #3a6247;
-  --warning: #a16207;
-  --warning-bg: rgba(161, 98, 7, 0.1);
-  --warning-text: #7c4d08;
-  --error: #a13d2d;
-  --error-bg: rgba(161, 61, 45, 0.1);
-  --error-text: #7f3021;
-  --info: #4a6b7c;
-  --info-bg: rgba(74, 107, 124, 0.1);
-  --info-text: #385462;
+  --success: #7ab089;
+  --success-bg: rgba(122, 176, 137, 0.14);
+  --success-text: #8fbd9c;
+  --warning: #d69e44;
+  --warning-bg: rgba(214, 158, 68, 0.14);
+  --warning-text: #d9a852;
+  --error: #d66a58;
+  --error-bg: rgba(214, 106, 88, 0.14);
+  --error-text: #dd8b74;
+  --info: #78a0b6;
+  --info-bg: rgba(120, 160, 182, 0.14);
+  --info-text: #8fb8cc;
 
-  /* ---- Applied theme (light) ---- */
-  --bg: var(--gray-50);
-  --bg-elevated: #fffefb;
-  --bg-subtle: var(--gray-100);
-  --bg-inset: #edebe1;
-  --text: var(--gray-600);
-  --text-strong: var(--gray-800);
-  --text-heading: var(--gray-900);
-  --border: var(--gray-200);
-  --border-strong: var(--gray-300);
+  /* ---- Applied theme (dark) ---- */
+  --bg: #161512;
+  --bg-elevated: #1d1c17;
+  --bg-subtle: #232219;
+  --bg-inset: #2a2820;
+  --text: #a8a496;
+  --text-strong: #ddd9cb;
+  --text-heading: #f4f1e6;
+  --border: #2e2c24;
+  --border-strong: #413d31;
 
   /* ---- Typography ---- */
   --font-display: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
@@ -96,9 +96,9 @@
 
   /* ---- Shadows (near-flat; hairlines do the work) ---- */
   --shadow-sm: none;
-  --shadow-md: 0 1px 3px rgba(26, 24, 18, 0.05);
-  --shadow-lg: 0 8px 28px rgba(26, 24, 18, 0.09);
-  --shadow-primary: 0 4px 14px rgba(26, 24, 18, 0.16);
+  --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.45);
+  --shadow-primary: 0 4px 14px rgba(0, 0, 0, 0.5);
 
   /* ---- Transitions ---- */
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
@@ -110,43 +110,14 @@
   --sidebar-w: 248px;
   --topbar-h: 64px;
 
-  color-scheme: light;
-}
+  /* ---- FX layer (edge bloom / scroll line) ----
+     Consumed by fx.css. RGB triplets so alpha is composable with
+     rgba(var(--fx-bloom-rgb) / a). Luminous gold, screen-blended so it
+     glows on the charcoal. */
+  --fx-particle-blend: screen;
+  --fx-bloom-rgb: 201 164 104;        /* screen-edge bloom + shimmers */
+  --fx-bloom-alpha: 0.11;
+  --fx-line-rgb: 201 164 104;         /* scroll progress line */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* warm charcoal — the same paper, lights off */
-    --bg: #161512;
-    --bg-elevated: #1d1c17;
-    --bg-subtle: #232219;
-    --bg-inset: #2a2820;
-    --text: #a8a496;
-    --text-strong: #ddd9cb;
-    --text-heading: #f4f1e6;
-    --border: #2e2c24;
-    --border-strong: #413d31;
-
-    --ink: #f4f1e6;
-    --ink-soft: #c9c5b6;
-
-    --accent: #c9a468;
-    --accent-strong: #ddb87e;
-    --accent-tint: rgba(201, 164, 104, 0.14);
-
-    --success-bg: rgba(122, 176, 137, 0.14);
-    --success-text: #8fbd9c;
-    --warning-bg: rgba(214, 158, 68, 0.14);
-    --warning-text: #d9a852;
-    --error-bg: rgba(214, 106, 88, 0.14);
-    --error-text: #dd8b74;
-    --info-bg: rgba(120, 160, 182, 0.14);
-    --info-text: #8fb8cc;
-
-    --shadow-sm: none;
-    --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.35);
-    --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.45);
-    --shadow-primary: 0 4px 14px rgba(0, 0, 0, 0.5);
-
-    color-scheme: dark;
-  }
+  color-scheme: dark;
 }
