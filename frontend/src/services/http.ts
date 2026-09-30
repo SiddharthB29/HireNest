@@ -52,8 +52,16 @@ function extractMessage(data: unknown, fallback: string): string {
   return fallback;
 }
 
+// export const http = axios.create({
+//   baseURL: '/api',
+//   headers: { 'Content-Type': 'application/json' },
+//   timeout: 15_000,
+// });
+
+const API_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '');
+
 export const http = axios.create({
-  baseURL: '/api',
+  baseURL: `${API_URL}/api`,
   headers: { 'Content-Type': 'application/json' },
   timeout: 15_000,
 });
