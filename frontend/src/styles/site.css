@@ -642,6 +642,28 @@
   display: flex;
   align-items: center;
   gap: var(--sp-3);
+
+  /* Blend with the dashboard background */
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: inherit;
+
+  /* Remove default button appearance */
+  font: inherit;
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius-md);
+
+  /* Show that this is clickable */
+  cursor: pointer;
+
+  transition:
+    background var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease);
+}
+
+.topbar-user:hover {
+  background: var(--bg-subtle);
+  border-color: var(--border-strong);
 }
 
 /* Brand link in the dashboard sidebar: navigating home is the one
@@ -1011,4 +1033,29 @@
 
 .page-enter {
   animation: page-in 240ms var(--ease);
+}
+
+/* ---------- Modern scrollbar ---------- */
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+html::-webkit-scrollbar {
+  width: 8px;
+}
+
+html::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--bg);
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
 }

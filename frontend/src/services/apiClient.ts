@@ -89,6 +89,17 @@ export async function refreshSession(): Promise<AuthResult> {
   return { token, user: userFromToken(token) };
 }
 
+/** POST /api/auth/change-password — changes the password of the authenticated user. */
+export function changePassword(
+  currentPassword: string,
+  newPassword: string
+): Promise<void> {
+  return httpPost('/auth/change-password', {
+    currentPassword,
+    newPassword,
+  });
+}
+
 /** GET /api/companies */
 export function getCompanies(): Promise<Company[]> {
   return httpGet('/companies');

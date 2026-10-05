@@ -1,10 +1,6 @@
 package com.placement.controller;
 
-import com.placement.dto.AdminRecruiterRequest;
-import com.placement.dto.AuthResponse;
-import com.placement.dto.LoginRequest;
-import com.placement.dto.RegisterRequest;
-import com.placement.dto.UserSummaryResponse;
+import com.placement.dto.*;
 import com.placement.entity.User;
 import com.placement.service.AuthService;
 import org.springframework.http.HttpStatus;
@@ -43,6 +39,15 @@ public class AuthController {
         String token = authService.login(request);
 
         return ResponseEntity.ok(token);
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<Void> changePassword(
+            @RequestBody ChangePasswordRequest request) {
+
+        authService.changePassword(request);
+
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/admin/recruiters")

@@ -21,6 +21,7 @@ export function DashboardLayout({
   children?: React.ReactNode;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -82,15 +83,68 @@ export function DashboardLayout({
             <span className="topbar-title">{title}</span>
           </div>
 
-          <div className="topbar-user">
-            <div style={{ textAlign: 'right' }}>
-              <div className="text-sm text-strong">{user?.userName}</div>
-              <div className="text-xs text-muted">{user?.role}</div>
-            </div>
-            <span className="topbar-avatar" aria-hidden="true">
-              {initials}
-            </span>
-          </div>
+          <div style={{ position: 'relative' }}>
+      <button
+        type="button"
+        className="topbar-user"
+        onClick={() => setAccountMenuOpen((open) => !open)}
+        aria-expanded={accountMenuOpen}
+        aria-haspopup="menu"
+      >
+        <div style={{ textAlign: 'right' }}>
+          <div className="text-sm text-strong">{user?.userName}</div>
+          <div className="text-xs text-muted">{user?.role}</div>
+        </div>
+
+        <span className="topbar-avatar" aria-hidden="true">
+          {initials}
+        </span>
+      </button>
+
+      {accountMenuOpen && (
+        <div
+          role="menu"
+          style={{
+            position: 'absolute',
+            right: 0,
+            top: 'calc(100% + var(--sp-2))',
+            minWidth: '180px',
+            padding: 'var(--sp-2)',
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: 'var(--shadow-md)',
+            zIndex: 100,
+          }}
+        >
+          <button
+            type="button"
+            role="menuitem"
+            className="btn btn-ghost"
+            style={{ width: '100%', textAlign: 'left' }}
+            onClick={() => {
+              setAccountMenuOpen(false);
+              navigate('/account/change-password');
+            }}
+          >
+            Change password
+          </button>
+
+          <button
+            type="button"
+            role="menuitem"
+            className="btn btn-ghost"
+            style={{ width: '100%', textAlign: 'left' }}
+            onClick={() => {
+              setAccountMenuOpen(false);
+              handleLogout();
+            }}
+          >
+            Log out
+          </button>
+        </div>
+      )}
+    </div>
         </header>
 
         <main className="dashboard-content page-enter">{children ?? <Outlet />}</main>

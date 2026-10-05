@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-
+import com.placement.dto.ChangePasswordRequest;
 @Service
 public class AuthService {
 
@@ -138,6 +138,35 @@ public class AuthService {
         return jwtService.generateToken(user);
     }
 
+    public void changePassword(ChangePasswordRequest request) {
+
+        User user = getAuthenticatedUser();
+
+        if (!passwordEncoder.matches(
+                request.getCurrentPassword(),
+                user.getPassword())) {
+
+            throw new BadCredentialsException("Current password is incorrect");
+        }
+
+        if (request.getNewPassword() == null ||
+                request.getNewPassword().isBlank()) {
+
+            throw new IllegalArgumentException("New password cannot be empty");
+        }
+
+        if (request.getCurrentPassword().equals(request.getNewPassword())) {
+
+            throw new IllegalArgumentException(
+                    "New password must be different from current password");
+        }
+
+        user.setPassword(
+                passwordEncoder.encode(request.getNewPassword())
+        );
+
+        userRepository.save(user);
+    }
     /**
      * Issues a fresh token for the caller so the frontend can pick up new
      * claims (e.g. a student link created after the original login) without

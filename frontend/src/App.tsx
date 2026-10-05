@@ -23,6 +23,9 @@ import { AdminCompaniesPage } from './pages/admin/AdminCompaniesPage';
 import { AdminRecruitersPage } from './pages/admin/AdminRecruitersPage';
 import { AdminApplicationsPage } from './pages/admin/AdminApplicationsPage';
 
+import { ChangePasswordPage } from './pages/account/ChangePasswordPage';
+
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -84,6 +87,14 @@ export default function App() {
               element={
                 <RequireRole roles={['RECRUITER']}>
                   <RecruiterDashboardPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/account/change-password"
+              element={
+                <RequireRole roles={['RECRUITER']}>
+                  <ChangePasswordPage />
                 </RequireRole>
               }
             />
