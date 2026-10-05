@@ -55,6 +55,16 @@ export default function App() {
               }
             />
 
+            {/* Account */}
+            <Route
+              path="/account/change-password"
+              element={
+                <RequireRole roles={['STUDENT', 'RECRUITER', 'ADMIN']}>
+                  <ChangePasswordPage />
+                </RequireRole>
+              }
+            />
+            
             {/* Student */}
             <Route
               path="/student"
