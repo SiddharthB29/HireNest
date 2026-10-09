@@ -4,6 +4,7 @@ import com.placement.entity.Student;
 import com.placement.service.StudentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -60,5 +61,15 @@ public class StudentController {
         studentService.deleteStudent(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/resume")
+    public ResponseEntity<String> uploadResume(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file) {
+
+        String resumePath = studentService.uploadResume(id, file);
+
+        return ResponseEntity.ok(resumePath);
     }
 }

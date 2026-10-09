@@ -4,6 +4,7 @@ import com.placement.entity.Role;
 import com.placement.entity.User;
 import com.placement.exception.ResourceNotFoundException;
 import com.placement.repository.UserRepository;
+import org.apache.tika.exception.TikaException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,8 +12,10 @@ import org.springframework.stereotype.Service;
 
 import com.placement.entity.Student;
 import com.placement.repository.StudentRepository;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -20,10 +23,16 @@ public class StudentService {
 
     private final StudentRepository studentRepository;
     private final UserRepository userRepository;
+    private final ResumeTextExtractor resumeTextExtractor;
+    private final ResumeCacheService resumeCacheService;
 
     public StudentService(StudentRepository studentRepository,
+                          ResumeCacheService resumeCacheService,
+                          ResumeTextExtractor resumeTextExtractor,
                           UserRepository userRepository) {
         this.studentRepository = studentRepository;
+        this.resumeTextExtractor = resumeTextExtractor;
+        this.resumeCacheService = resumeCacheService;
         this.userRepository = userRepository;
     }
 
@@ -209,5 +218,46 @@ public class StudentService {
         userRepository.save(user);
 
         studentRepository.delete(student);
+    }
+
+    public String uploadResume(Long studentId, MultipartFile file) {
+
+        // existing authentication checks
+        // existing student ownership checks
+
+        User user = getAuthenticatedUser();
+
+        if (user.getRole() != Role.STUDENT) {
+            throw new IllegalArgumentException(
+                    "Only students can upload resumes"
+            );
+        }
+
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Student not found with id: " + studentId
+                        )
+                );
+
+        if (user.getStudent() == null
+                || !user.getStudent().getId().equals(studentId)) {
+
+            throw new IllegalArgumentException(
+                    "You can only upload your own resume"
+            );
+        }
+
+        String resumeText;
+
+        try {
+            resumeText = resumeTextExtractor.extractText(file);
+        } catch (IOException | TikaException e) {
+            throw new RuntimeException("Failed to extract text from resume", e);
+        }
+
+        resumeCacheService.cacheResumeText(studentId, resumeText);
+
+        return "Resume processed and cached successfully";
     }
 }

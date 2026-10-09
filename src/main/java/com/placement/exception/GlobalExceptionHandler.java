@@ -153,4 +153,17 @@ public class GlobalExceptionHandler {
 
                 return new ResponseEntity<>(errorResponse, ex.getStatusCode());
         }
+
+        @ExceptionHandler(FileStorageException.class)
+        public ResponseEntity<ErrorResponse> handleFileStorageException(
+                FileStorageException ex) {
+
+                ErrorResponse errorResponse =
+                        new ErrorResponse(500, "Could not store resume");
+
+                return new ResponseEntity<>(
+                        errorResponse,
+                        HttpStatus.INTERNAL_SERVER_ERROR
+                );
+        }
 }
