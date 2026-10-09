@@ -35,7 +35,8 @@ public class Student {
 
     /* Optional profile links — all nullable; Hibernate adds these columns
        via ddl-auto=update without touching existing rows. */
-    private String resumeUrl;
+    @Column(name = "resume_url")
+    private String resumePath;
 
     private String portfolioUrl;
 
@@ -133,14 +134,6 @@ public class Student {
         this.graduationYear = graduationYear;
     }
 
-    public String getResumeUrl() {
-        return resumeUrl;
-    }
-
-    public void setResumeUrl(String resumeUrl) {
-        this.resumeUrl = resumeUrl;
-    }
-
     public String getPortfolioUrl() {
         return portfolioUrl;
     }
@@ -171,5 +164,13 @@ public class Student {
 
     public void setCertificationsUrl(String certificationsUrl) {
         this.certificationsUrl = certificationsUrl;
+    }
+
+    public String getResumePath() {
+        return resumePath;
+    }
+
+    public void setResumePath(String resumePath) {
+        this.resumePath = resumePath;
     }
 }

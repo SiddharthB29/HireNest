@@ -6,6 +6,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.client.RestClientException;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -71,6 +72,72 @@ public class ResumeStorageService {
         }
 
         return fileName;
+    }
+
+
+    public byte[] downloadResume(Long studentId, String storagePath) {
+
+        if (studentId == null || studentId <= 0
+                || storagePath == null) {
+            throw new IllegalArgumentException(
+                    "Student ID and resume storage path are required"
+            );
+        }
+
+        // Ensure the path belongs to this student and matches
+        // the UUID-based filenames created by uploadResume().
+        String expectedPathPattern =
+                "^" + studentId
+                        + "/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-"
+                        + "[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
+                        + "[0-9a-fA-F]{12}\\.(pdf|docx)$";
+
+        if (!storagePath.matches(expectedPathPattern)) {
+            throw new IllegalArgumentException(
+                    "Invalid resume storage path"
+            );
+        }
+
+        String downloadUrl =
+                supabaseUrl
+                        + "/storage/v1/object/"
+                        + BUCKET_NAME
+                        + "/"
+                        + storagePath;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + supabaseKey);
+        headers.set("apikey", supabaseKey);
+
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<byte[]> response = restTemplate.exchange(
+                    downloadUrl,
+                    HttpMethod.GET,
+                    request,
+                    byte[].class
+            );
+
+            byte[] fileBytes = response.getBody();
+
+            if (fileBytes == null || fileBytes.length == 0) {
+                throw new FileStorageException(
+                        "Downloaded resume is empty",
+                        new IllegalStateException(
+                                "Supabase returned an empty response body"
+                        )
+                );
+            }
+
+            return fileBytes;
+
+        } catch (RestClientException ex) {
+            throw new FileStorageException(
+                    "Could not download resume from Supabase",
+                    ex
+            );
+        }
     }
 
     private void validateFile(MultipartFile file) {

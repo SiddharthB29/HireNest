@@ -25,14 +25,17 @@ public class StudentService {
     private final UserRepository userRepository;
     private final ResumeTextExtractor resumeTextExtractor;
     private final ResumeCacheService resumeCacheService;
+    private final ResumeStorageService resumeStorageService;
 
     public StudentService(StudentRepository studentRepository,
                           ResumeCacheService resumeCacheService,
                           ResumeTextExtractor resumeTextExtractor,
+                          ResumeStorageService resumeStorageService,
                           UserRepository userRepository) {
         this.studentRepository = studentRepository;
         this.resumeTextExtractor = resumeTextExtractor;
         this.resumeCacheService = resumeCacheService;
+        this.resumeStorageService = resumeStorageService;
         this.userRepository = userRepository;
     }
 
@@ -134,7 +137,7 @@ public class StudentService {
             existingStudent.setSkills(student.getSkills());
             existingStudent.setProjectCount(student.getProjectCount());
             existingStudent.setCertificationCount(student.getCertificationCount());
-            existingStudent.setResumeUrl(student.getResumeUrl());
+            existingStudent.setResumePath(student.getResumePath());
             existingStudent.setPortfolioUrl(student.getPortfolioUrl());
             existingStudent.setGithubUrl(student.getGithubUrl());
             existingStudent.setLinkedinUrl(student.getLinkedinUrl());
@@ -169,7 +172,7 @@ public class StudentService {
         existingStudent.setSkills(student.getSkills());
         existingStudent.setProjectCount(student.getProjectCount());
         existingStudent.setCertificationCount(student.getCertificationCount());
-        existingStudent.setResumeUrl(student.getResumeUrl());
+        existingStudent.setResumePath(student.getResumePath());
         existingStudent.setPortfolioUrl(student.getPortfolioUrl());
         existingStudent.setGithubUrl(student.getGithubUrl());
         existingStudent.setLinkedinUrl(student.getLinkedinUrl());
@@ -220,44 +223,59 @@ public class StudentService {
         studentRepository.delete(student);
     }
 
-    public String uploadResume(Long studentId, MultipartFile file) {
 
-        // existing authentication checks
-        // existing student ownership checks
+    public String uploadResume(Long studentId, MultipartFile file) {
 
         User user = getAuthenticatedUser();
 
         if (user.getRole() != Role.STUDENT) {
-            throw new IllegalArgumentException(
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
                     "Only students can upload resumes"
             );
         }
 
         Student student = studentRepository.findById(studentId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Student not found with id: " + studentId
-                        )
-                );
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Student not found with id: " + studentId
+                ));
 
         if (user.getStudent() == null
                 || !user.getStudent().getId().equals(studentId)) {
-
-            throw new IllegalArgumentException(
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
                     "You can only upload your own resume"
             );
         }
 
+        // 1. Upload the original file to private Supabase Storage.
+        String storagePath =
+                resumeStorageService.uploadResume(studentId, file);
+
+        // 2. Save the path against the student.
+        // We will consider renaming resumeUrl after checking
+        // all existing references and database implications.
+        student.setResumePath(storagePath);
+        studentRepository.save(student);
+
+        // 3. Extract the resume text.
         String resumeText;
 
         try {
             resumeText = resumeTextExtractor.extractText(file);
         } catch (IOException | TikaException e) {
-            throw new RuntimeException("Failed to extract text from resume", e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Resume was stored, but text extraction failed"
+            );
+        } catch (IllegalArgumentException e) {
+            throw e;
         }
 
+        // 4. Cache the extracted text for 24 hours.
         resumeCacheService.cacheResumeText(studentId, resumeText);
 
-        return "Resume processed and cached successfully";
+        return "Resume uploaded and processed successfully";
     }
+
 }
