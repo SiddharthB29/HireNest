@@ -152,6 +152,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/students/**")
                         .hasAnyRole("STUDENT", "ADMIN")
 
+                        .requestMatchers(HttpMethod.GET, "/api/ai/job-match/**")
+                        .hasRole("STUDENT")
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(

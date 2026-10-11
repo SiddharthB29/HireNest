@@ -62,7 +62,15 @@ public class JobController {
                         job.getGraduationYear(),
                         job.getJobType(),
                         job.getCompany().getId(),
-                        job.getCompany().getName()
+                        job.getCompany().getName(),
+                        job.getAboutCompany(),
+                        job.getResponsibilities(),
+                        job.getRequiredQualifications(),
+                        job.getPreferredQualifications(),
+                        job.getWhatYouWillLearn(),
+                        job.getEligibilityCriteria(),
+                        job.getAdditionalNotes(),
+                        job.getWorkMode()
                 ))
                 .toList();
 
@@ -89,7 +97,14 @@ public class JobController {
                 job.getGraduationYear(),
                 job.getJobType(),
                 job.getCompany().getId(),
-                job.getCompany().getName()
+                job.getCompany().getName(),job.getAboutCompany(),
+                job.getResponsibilities(),
+                job.getRequiredQualifications(),
+                job.getPreferredQualifications(),
+                job.getWhatYouWillLearn(),
+                job.getEligibilityCriteria(),
+                job.getAdditionalNotes(),
+                job.getWorkMode()
         );
 
         return ResponseEntity.ok(response);
@@ -115,7 +130,15 @@ public class JobController {
                         job.getGraduationYear(),
                         job.getJobType(),
                         job.getCompany().getId(),
-                        job.getCompany().getName()
+                        job.getCompany().getName(),
+                        job.getAboutCompany(),
+                        job.getResponsibilities(),
+                        job.getRequiredQualifications(),
+                        job.getPreferredQualifications(),
+                        job.getWhatYouWillLearn(),
+                        job.getEligibilityCriteria(),
+                        job.getAdditionalNotes(),
+                        job.getWorkMode()
                 ))
                 .toList();
 

@@ -1,11 +1,14 @@
 
 package com.placement.controller;
 
+import com.placement.dto.JobMatchResponse;
 import com.placement.dto.ResumeAnalysisResponse;
 import com.placement.entity.Role;
 import com.placement.entity.User;
 import com.placement.exception.ResourceNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
 import com.placement.repository.UserRepository;
+import com.placement.service.AiJobMatchingService;
 import com.placement.service.AiResumeAnalysisService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -19,12 +22,15 @@ public class AiTestController {
 
     private final AiResumeAnalysisService aiResumeAnalysisService;
     private final UserRepository userRepository;
+    private final AiJobMatchingService aiJobMatchingService;
 
     public AiTestController(
             AiResumeAnalysisService aiResumeAnalysisService,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            AiJobMatchingService aiJobMatchingService) {
         this.aiResumeAnalysisService = aiResumeAnalysisService;
         this.userRepository = userRepository;
+        this.aiJobMatchingService = aiJobMatchingService;
     }
 
     private User getAuthenticatedUser() {
@@ -83,4 +89,25 @@ public class AiTestController {
 
         return aiResumeAnalysisService.analyzeStudentResume(studentId);
     }
+
+    @GetMapping("/job-match/{jobId}")
+    public JobMatchResponse analyzeJobFit(@PathVariable Long jobId) {
+
+        User user = getAuthenticatedUser();
+
+        if (user.getRole() != Role.STUDENT) {
+            throw new AccessDeniedException(
+                    "Only students can request job fit analysis.");
+        }
+
+        if (user.getStudent() == null) {
+            throw new IllegalStateException(
+                    "No student profile is linked to this account.");
+        }
+
+        Long studentId = user.getStudent().getId();
+
+        return aiJobMatchingService.analyzeJobFit(studentId, jobId);
+    }
+
 }

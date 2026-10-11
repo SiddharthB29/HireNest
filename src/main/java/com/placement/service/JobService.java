@@ -139,6 +139,14 @@ public class JobService {
         existingJob.setRequiredSkills(updatedJob.getRequiredSkills());
         existingJob.setPreferredSkills(updatedJob.getPreferredSkills());
         existingJob.setJobType(updatedJob.getJobType());
+        existingJob.setAboutCompany(updatedJob.getAboutCompany());
+        existingJob.setResponsibilities(updatedJob.getResponsibilities());
+        existingJob.setRequiredQualifications(updatedJob.getRequiredQualifications());
+        existingJob.setPreferredQualifications(updatedJob.getPreferredQualifications());
+        existingJob.setWhatYouWillLearn(updatedJob.getWhatYouWillLearn());
+        existingJob.setEligibilityCriteria(updatedJob.getEligibilityCriteria());
+        existingJob.setAdditionalNotes(updatedJob.getAdditionalNotes());
+        existingJob.setWorkMode(updatedJob.getWorkMode());
 
         return jobRepository.save(existingJob);
     }

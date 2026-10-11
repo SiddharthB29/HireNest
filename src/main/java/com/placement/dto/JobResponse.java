@@ -21,18 +21,44 @@ public class JobResponse {
     private Set<String> allowedBranches;
     private Integer graduationYear;
 
+    private String aboutCompany;
+    private String responsibilities;
+    private String requiredQualifications;
+    private String preferredQualifications;
+    private String whatYouWillLearn;
+    private String eligibilityCriteria;
+    private String additionalNotes;
+    private String workMode;
+
     private Long companyId;
     private String companyName;
 
     public JobResponse() {
     }
 
-    public JobResponse(Long id, String title, String description,
-                       String location, Double salary, Double minimumCgpa,
-                       Integer maximumBacklogs, Set<String> requiredSkills,
-                       Set<String> preferredSkills, Set<String> allowedBranches,
-                       Integer graduationYear, String jobType,
-                       Long companyId, String companyName) {
+    public JobResponse(
+            Long id,
+            String title,
+            String description,
+            String location,
+            Double salary,
+            Double minimumCgpa,
+            Integer maximumBacklogs,
+            Set<String> requiredSkills,
+            Set<String> preferredSkills,
+            Set<String> allowedBranches,
+            Integer graduationYear,
+            String jobType,
+            Long companyId,
+            String companyName,
+            String aboutCompany,
+            String responsibilities,
+            String requiredQualifications,
+            String preferredQualifications,
+            String whatYouWillLearn,
+            String eligibilityCriteria,
+            String additionalNotes,
+            String workMode) {
 
         this.id = id;
         this.title = title;
@@ -48,6 +74,14 @@ public class JobResponse {
         this.jobType = jobType;
         this.companyId = companyId;
         this.companyName = companyName;
+        this.aboutCompany = aboutCompany;
+        this.responsibilities = responsibilities;
+        this.requiredQualifications = requiredQualifications;
+        this.preferredQualifications = preferredQualifications;
+        this.whatYouWillLearn = whatYouWillLearn;
+        this.eligibilityCriteria = eligibilityCriteria;
+        this.additionalNotes = additionalNotes;
+        this.workMode = workMode;
     }
 
     public Long getId() {

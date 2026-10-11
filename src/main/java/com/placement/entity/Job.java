@@ -41,6 +41,29 @@ public class Job {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
+    @Column(columnDefinition = "TEXT")
+    private String aboutCompany;
+
+    @Column(columnDefinition = "TEXT")
+    private String responsibilities;
+
+    @Column(columnDefinition = "TEXT")
+    private String requiredQualifications;
+
+    @Column(columnDefinition = "TEXT")
+    private String preferredQualifications;
+
+    @Column(columnDefinition = "TEXT")
+    private String whatYouWillLearn;
+
+    @Column(columnDefinition = "TEXT")
+    private String eligibilityCriteria;
+
+    @Column(columnDefinition = "TEXT")
+    private String additionalNotes;
+
+    private String workMode;
+
     public Job() {
     }
 
@@ -143,4 +166,69 @@ public class Job {
     public void setCompany(Company company) {
         this.company = company;
     }
+
+    public String getAboutCompany() {
+        return aboutCompany;
+    }
+
+    public void setAboutCompany(String aboutCompany) {
+        this.aboutCompany = aboutCompany;
+    }
+
+    public String getResponsibilities() {
+        return responsibilities;
+    }
+
+    public void setResponsibilities(String responsibilities) {
+        this.responsibilities = responsibilities;
+    }
+
+    public String getRequiredQualifications() {
+        return requiredQualifications;
+    }
+
+    public void setRequiredQualifications(String requiredQualifications) {
+        this.requiredQualifications = requiredQualifications;
+    }
+
+    public String getPreferredQualifications() {
+        return preferredQualifications;
+    }
+
+    public void setPreferredQualifications(String preferredQualifications) {
+        this.preferredQualifications = preferredQualifications;
+    }
+
+    public String getWhatYouWillLearn() {
+        return whatYouWillLearn;
+    }
+
+    public void setWhatYouWillLearn(String whatYouWillLearn) {
+        this.whatYouWillLearn = whatYouWillLearn;
+    }
+
+    public String getEligibilityCriteria() {
+        return eligibilityCriteria;
+    }
+
+    public void setEligibilityCriteria(String eligibilityCriteria) {
+        this.eligibilityCriteria = eligibilityCriteria;
+    }
+
+    public String getAdditionalNotes() {
+        return additionalNotes;
+    }
+
+    public void setAdditionalNotes(String additionalNotes) {
+        this.additionalNotes = additionalNotes;
+    }
+
+    public String getWorkMode() {
+        return workMode;
+    }
+
+    public void setWorkMode(String workMode) {
+        this.workMode = workMode;
+    }
+
 }
