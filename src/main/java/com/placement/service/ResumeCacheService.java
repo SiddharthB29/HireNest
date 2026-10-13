@@ -31,7 +31,8 @@ public class ResumeCacheService {
         } catch (Exception e) {
             logger.warn(
                     "Resume cache write failed for student {}. Continuing without cache.",
-                    studentId
+                    studentId,
+                    e
             );
         }
     }
@@ -44,7 +45,8 @@ public class ResumeCacheService {
         } catch (Exception e) {
             logger.warn(
                     "Resume cache read failed for student {}. Recovering from storage.",
-                    studentId
+                    studentId,
+                    e
             );
             return null;
         }
@@ -58,7 +60,8 @@ public class ResumeCacheService {
         } catch (Exception e) {
             logger.warn(
                     "Resume cache deletion failed for student {}.",
-                    studentId
+                    studentId,
+                    e
             );
         }
     }
