@@ -5,6 +5,7 @@ import com.placement.exception.ResourceNotFoundException;
 import com.placement.repository.StudentRepository;
 import org.apache.tika.exception.TikaException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 
@@ -44,8 +45,9 @@ public class ResumeTextService {
             String resumePath = student.getResumePath();
 
             if (resumePath == null || resumePath.isBlank()) {
-                throw new IllegalStateException(
-                        "No resume path found for student: " + studentId
+                throw new ResponseStatusException(
+                        org.springframework.http.HttpStatus.BAD_REQUEST,
+                        "No resume uploaded for this student"
                 );
             }
 

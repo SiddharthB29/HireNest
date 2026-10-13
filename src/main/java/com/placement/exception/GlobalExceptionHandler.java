@@ -11,6 +11,8 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.server.ResponseStatusException;
+import com.openai.errors.UnauthorizedException;
+import com.openai.errors.RateLimitException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -114,6 +116,32 @@ public class GlobalExceptionHandler {
                 return new ResponseEntity<>(
                         errorResponse,
                         HttpStatus.BAD_REQUEST);
+        }
+
+        @ExceptionHandler(UnauthorizedException.class)
+        public ResponseEntity<ErrorResponse> handleAiAuthenticationFailure(
+                UnauthorizedException ex) {
+
+                ErrorResponse errorResponse = new ErrorResponse(
+                        HttpStatus.BAD_GATEWAY.value(),
+                        "AI service authentication failed. Please try again later.");
+
+                return new ResponseEntity<>(
+                        errorResponse,
+                        HttpStatus.BAD_GATEWAY);
+        }
+
+        @ExceptionHandler(RateLimitException.class)
+        public ResponseEntity<ErrorResponse> handleAiRateLimit(
+                RateLimitException ex) {
+
+                ErrorResponse errorResponse = new ErrorResponse(
+                        HttpStatus.SERVICE_UNAVAILABLE.value(),
+                        "AI service is temporarily busy. Please try again later.");
+
+                return new ResponseEntity<>(
+                        errorResponse,
+                        HttpStatus.SERVICE_UNAVAILABLE);
         }
 
         @ExceptionHandler(Exception.class)
