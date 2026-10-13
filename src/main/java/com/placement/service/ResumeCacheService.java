@@ -28,6 +28,9 @@ public class ResumeCacheService {
                     text,
                     Duration.ofHours(24)
             );
+
+            logger.info("Resume cache write succeeded for student {}.", studentId);
+
         } catch (Exception e) {
             logger.warn(
                     "Resume cache write failed for student {}. Continuing without cache.",
@@ -41,7 +44,16 @@ public class ResumeCacheService {
         String key = "resume:text:" + studentId;
 
         try {
-            return redisTemplate.opsForValue().get(key);
+            String cachedText = redisTemplate.opsForValue().get(key);
+
+            if (cachedText != null) {
+                logger.info("Resume cache read succeeded for student {}.", studentId);
+            } else {
+                logger.info("Resume cache miss for student {}.", studentId);
+            }
+
+            return cachedText;
+
         } catch (Exception e) {
             logger.warn(
                     "Resume cache read failed for student {}. Recovering from storage.",
