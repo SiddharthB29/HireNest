@@ -9,6 +9,8 @@ import type {
   JobInput,
   PageResponse,
   PlacementEvaluation,
+  JobMatchAnalysis,
+  ResumeAnalysis,
   Student,
   StudentInput,
   User,
@@ -30,6 +32,100 @@ import { ApiError, httpDelete, httpGet, httpPatch, httpPost, httpPut } from './h
 export interface AuthResult {
   token: string;
   user: User;
+}
+
+const AI_ANALYSIS_TIMEOUT_MS = 90_000;
+
+function invalidAiResponse(): ApiError {
+  return new ApiError(0, 'The AI service returned an invalid response. Please try the analysis again later.');
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    throw invalidAiResponse();
+  }
+  return value as Record<string, unknown>;
+}
+
+function optionalString(value: unknown): string {
+  if (value === undefined || value === null) return '';
+  if (typeof value !== 'string') throw invalidAiResponse();
+  return value;
+}
+
+function optionalStringArray(value: unknown): string[] {
+  if (value === undefined || value === null) return [];
+  if (!Array.isArray(value) || !value.every((item) => typeof item === 'string')) {
+    throw invalidAiResponse();
+  }
+  return value;
+}
+
+function parseResumeAnalysis(value: unknown): ResumeAnalysis {
+  const response = asRecord(value);
+  const fields = ['technicalSkills', 'strengths', 'potentialGaps', 'suggestions', 'overallSummary'];
+  if (!fields.some((field) => Object.prototype.hasOwnProperty.call(response, field))) {
+    throw invalidAiResponse();
+  }
+  return {
+    technicalSkills: optionalStringArray(response.technicalSkills),
+    strengths: optionalStringArray(response.strengths),
+    potentialGaps: optionalStringArray(response.potentialGaps),
+    suggestions: optionalStringArray(response.suggestions),
+    overallSummary: optionalString(response.overallSummary),
+  };
+}
+
+function parseJobMatchAnalysis(value: unknown, requestedJobId: number): JobMatchAnalysis {
+  const response = asRecord(value);
+  const analysisFields = [
+    'jobTitle',
+    'overallAssessment',
+    'relevantStrengths',
+    'requirementsNotDemonstrated',
+    'improvementSuggestions',
+    'overallSummary',
+  ];
+  if (!analysisFields.some((field) => Object.prototype.hasOwnProperty.call(response, field))) {
+    throw invalidAiResponse();
+  }
+  const jobId = response.jobId;
+  const jobTitle = response.jobTitle;
+  if (
+    typeof jobId !== 'number' ||
+    !Number.isFinite(jobId) ||
+    jobId !== requestedJobId ||
+    typeof jobTitle !== 'string'
+  ) {
+    throw invalidAiResponse();
+  }
+  return {
+    jobId,
+    jobTitle,
+    overallAssessment: optionalString(response.overallAssessment),
+    relevantStrengths: optionalStringArray(response.relevantStrengths),
+    requirementsNotDemonstrated: optionalStringArray(response.requirementsNotDemonstrated),
+    improvementSuggestions: optionalStringArray(response.improvementSuggestions),
+    overallSummary: optionalString(response.overallSummary),
+  };
+}
+
+async function requestAiAnalysis<T>(url: string, parse: (value: unknown) => T): Promise<T> {
+  try {
+    const data = await httpGet<unknown>(url, { timeout: AI_ANALYSIS_TIMEOUT_MS });
+    return parse(data);
+  } catch (error) {
+    if (error instanceof ApiError && error.message === 'Unexpected error') {
+      throw new ApiError(0, 'The AI analysis could not be completed because of an unexpected client error. Please try again.');
+    }
+    throw error;
+  }
+}
+
+/** Strip the private storage reference returned by the backend at the API boundary. */
+function studentFromApi(student: Student): Student {
+  const { resumePath, ...profile } = student as Student & { resumePath?: string | null };
+  return { ...profile, hasResume: Boolean(resumePath) };
 }
 
 function userFromToken(token: string): User {
@@ -98,6 +194,25 @@ export function changePassword(
     currentPassword,
     newPassword,
   });
+}
+
+/** POST /api/students/{id}/resume — student-owned multipart upload. */
+export function uploadStudentResume(studentId: number, file: File): Promise<string> {
+  const body = new FormData();
+  body.append('file', file);
+  return httpPost(`/students/${studentId}/resume`, body, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+}
+
+/** GET /api/ai/resume-analysis — analyzes the authenticated student's stored resume. */
+export function analyzeMyResume(): Promise<ResumeAnalysis> {
+  return requestAiAnalysis('/ai/resume-analysis', parseResumeAnalysis);
+}
+
+/** GET /api/ai/job-match/{jobId} — match for the authenticated student. */
+export function analyzeJobMatch(jobId: number): Promise<JobMatchAnalysis> {
+  return requestAiAnalysis(`/ai/job-match/${jobId}`, (response) => parseJobMatchAnalysis(response, jobId));
 }
 
 /** GET /api/companies */
@@ -188,22 +303,22 @@ export function getApplications(): Promise<Application[]> {
 
 /** GET /api/students/{id} — students may read their own profile; admins any. */
 export function getStudent(id: number): Promise<Student> {
-  return httpGet(`/students/${id}`);
+  return httpGet<Student>(`/students/${id}`).then(studentFromApi);
 }
 
 /** POST /api/students — creates the logged-in student's profile (one only). */
 export function createStudent(input: StudentInput): Promise<Student> {
-  return httpPost('/students', input);
+  return httpPost<Student>('/students', input).then(studentFromApi);
 }
 
 /** PUT /api/students/{id} — students update their own profile; admins any. */
 export function updateStudent(id: number, input: StudentInput): Promise<Student> {
-  return httpPut(`/students/${id}`, input);
+  return httpPut<Student>(`/students/${id}`, input).then(studentFromApi);
 }
 
 /** GET /api/students — scoped by role server-side. */
 export function getStudents(): Promise<Student[]> {
-  return httpGet('/students');
+  return httpGet<Student[]>('/students').then((students) => students.map(studentFromApi));
 }
 
 /** POST /api/applications — the logged-in student applies; server enforces eligibility + duplicates. */

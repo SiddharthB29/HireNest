@@ -320,6 +320,45 @@ button {
   transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
 }
 
+.select {
+  background-color: var(--bg-elevated);
+  color-scheme: dark;
+}
+
+.select:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.select:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent-tint);
+}
+
+.select:disabled {
+  color: var(--gray-400);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.select option {
+  color: var(--text-heading);
+  background-color: var(--bg-elevated);
+}
+
+.select option:hover,
+.select option:focus {
+  color: var(--text-heading);
+  background-color: var(--bg-inset);
+}
+
+.select option:checked {
+  color: var(--ink);
+  background-color: var(--accent);
+}
+
+.select option:disabled {
+  color: var(--gray-400);
+}
+
 .input:focus,
 .select:focus,
 .textarea:focus {

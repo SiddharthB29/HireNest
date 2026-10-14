@@ -56,6 +56,30 @@ export interface Student {
   projectCount: number;
   certificationCount: number;
   graduationYear: number;
+  /** Derived by the API client; storage references stay inside the service layer. */
+  hasResume?: boolean;
+  portfolioUrl?: string | null;
+  githubUrl?: string | null;
+  linkedinUrl?: string | null;
+  certificationsUrl?: string | null;
+}
+
+export interface ResumeAnalysis {
+  technicalSkills: string[];
+  strengths: string[];
+  potentialGaps: string[];
+  suggestions: string[];
+  overallSummary: string;
+}
+
+export interface JobMatchAnalysis {
+  jobId: number;
+  jobTitle: string;
+  overallAssessment: string;
+  relevantStrengths: string[];
+  requirementsNotDemonstrated: string[];
+  improvementSuggestions: string[];
+  overallSummary: string;
 }
 
 export interface Application {
@@ -112,7 +136,7 @@ export interface JobInput {
 }
 
 /** Student profile creation/update payload. */
-export type StudentInput = Omit<Student, 'id'>;
+export type StudentInput = Omit<Student, 'id' | 'hasResume'>;
 
 export interface PageResponse<T> {
   content: T[];

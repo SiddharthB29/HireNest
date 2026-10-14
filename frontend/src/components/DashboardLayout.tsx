@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { Brand } from './Brand';
 import { useAuth } from '../context/AuthContext';
@@ -21,9 +21,45 @@ export function DashboardLayout({
   children?: React.ReactNode;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const mobileToggleRef = useRef<HTMLButtonElement>(null);
+  const mobileCloseRef = useRef<HTMLButtonElement>(null);
+  const wasMenuOpen = useRef(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const breakpoint = window.matchMedia('(max-width: 900px)');
+    const updateViewport = (event: MediaQueryList | MediaQueryListEvent) => {
+      setIsMobile(event.matches);
+      if (!event.matches) setMenuOpen(false);
+    };
+    updateViewport(breakpoint);
+    breakpoint.addEventListener('change', updateViewport);
+    return () => breakpoint.removeEventListener('change', updateViewport);
+  }, []);
+
+  useEffect(() => {
+    if (menuOpen) {
+      mobileCloseRef.current?.focus();
+    } else if (wasMenuOpen.current && isMobile) {
+      mobileToggleRef.current?.focus();
+    }
+    wasMenuOpen.current = menuOpen;
+  }, [menuOpen, isMobile]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('keydown', closeOnEscape);
+    return () => document.removeEventListener('keydown', closeOnEscape);
+  }, [menuOpen]);
 
   function handleLogout() {
     logout();
@@ -33,13 +69,22 @@ export function DashboardLayout({
   const initials = (user?.userName ?? '?').slice(0, 2).toUpperCase();
 
   return (
-    <div className="dashboard">
-      <aside className={`sidebar ${menuOpen ? 'is-open' : ''}`}>
+    <div className={`dashboard ${sidebarCollapsed ? 'is-collapsed' : ''}`}>
+      <aside id="dashboard-sidebar" className={`sidebar ${menuOpen ? 'is-open' : ''}`}>
         <div className="sidebar-head">
           {/* Click the HireNest symbol to leave the dashboard and go home. */}
           <Link to="/" aria-label="HireNest home" className="sidebar-brand-link">
             <Brand size="sm" />
           </Link>
+          <button
+            ref={mobileCloseRef}
+            type="button"
+            className="btn btn-ghost btn-sm mobile-only sidebar-close"
+            aria-label="Close navigation"
+            onClick={() => setMenuOpen(false)}
+          >
+            <span aria-hidden="true">×</span>
+          </button>
         </div>
 
         <nav className="sidebar-nav" aria-label={`${title} navigation`}>
@@ -50,18 +95,27 @@ export function DashboardLayout({
               end={link.end}
               className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
               onClick={() => setMenuOpen(false)}
+              aria-label={link.label}
+              title={sidebarCollapsed && !isMobile ? link.label : undefined}
             >
               <span className="link-mark" aria-hidden="true">
                 {link.icon}
               </span>
-              {link.label}
+              <span className="sidebar-label">{link.label}</span>
             </NavLink>
           ))}
         </nav>
 
         <div className="sidebar-foot">
-          <button className="btn btn-ghost" style={{ width: '100%' }} onClick={handleLogout}>
-            ← Log out
+          <button
+            type="button"
+            className="btn btn-ghost sidebar-link sidebar-logout"
+            aria-label="Log out"
+            title={sidebarCollapsed && !isMobile ? 'Log out' : undefined}
+            onClick={handleLogout}
+          >
+            <span className="link-mark" aria-hidden="true">↪</span>
+            <span className="sidebar-label">Log out</span>
           </button>
         </div>
       </aside>
@@ -70,15 +124,29 @@ export function DashboardLayout({
         <div className="sidebar-backdrop" onClick={() => setMenuOpen(false)} aria-hidden="true" />
       )}
 
-      <div className="dashboard-main">
+      <div className="dashboard-main" inert={isMobile && menuOpen}>
         <header className="topbar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)' }}>
+          <div className="topbar-leading">
             <button
               className="btn btn-ghost btn-sm mobile-only"
-              aria-label="Toggle sidebar"
+              type="button"
+              ref={mobileToggleRef}
+              aria-label={menuOpen ? 'Close navigation' : 'Open navigation'}
+              aria-expanded={menuOpen}
+              aria-controls="dashboard-sidebar"
               onClick={() => setMenuOpen((o) => !o)}
             >
-              ☰
+              <span className="sidebar-toggle-icon" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm desktop-only sidebar-toggle"
+              aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              aria-expanded={!sidebarCollapsed}
+              aria-controls="dashboard-sidebar"
+              onClick={() => setSidebarCollapsed((collapsed) => !collapsed)}
+            >
+              <span className="sidebar-toggle-icon" aria-hidden="true" />
             </button>
             <span className="topbar-title">{title}</span>
           </div>

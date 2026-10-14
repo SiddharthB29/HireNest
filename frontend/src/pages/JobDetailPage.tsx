@@ -34,8 +34,15 @@ export function JobDetailPage() {
         : Promise.resolve(null),
     [id, user?.id, user?.studentId],
   );
+  const studentProfile = useAsyncData(
+    () => isStudentWithProfile ? api.getStudent(user.studentId as number) : Promise.resolve(null),
+    [user?.id, user?.studentId, isStudentWithProfile],
+  );
 
   const [applying, setApplying] = useState(false);
+  const [matchLoading, setMatchLoading] = useState(false);
+  const [matchError, setMatchError] = useState<string | null>(null);
+  const [matchResult, setMatchResult] = useState<Awaited<ReturnType<typeof api.analyzeJobMatch>> | null>(null);
 
   if (job.loading) {
     return (
@@ -97,6 +104,19 @@ export function JobDetailPage() {
       showToast('error', err instanceof Error ? err.message : 'Failed to apply');
     } finally {
       setApplying(false);
+    }
+  }
+
+  async function handleJobMatch() {
+    setMatchLoading(true);
+    setMatchError(null);
+    setMatchResult(null);
+    try {
+      setMatchResult(await api.analyzeJobMatch(id));
+    } catch (err) {
+      setMatchError(err instanceof Error ? err.message : 'Job match analysis failed.');
+    } finally {
+      setMatchLoading(false);
     }
   }
 
@@ -229,7 +249,69 @@ export function JobDetailPage() {
           </section>
         </div>
       </div>
+      {isStudentWithProfile && (
+        <section className="card panel job-match-panel" aria-labelledby="job-match-heading">
+          <div className="panel-head">
+            <div>
+              <h2 id="job-match-heading">Resume match</h2>
+              <p className="text-sm text-muted" style={{ marginTop: 'var(--sp-2)' }}>
+                See how your uploaded resume aligns with this role.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={handleJobMatch}
+              disabled={!studentProfile.data?.hasResume || studentProfile.loading || matchLoading}
+            >
+              {matchLoading ? 'Matching…' : matchResult?.jobId === id ? 'Match again' : 'Analyze job match'}
+            </button>
+          </div>
+          <div className="panel-body">
+            {studentProfile.loading ? (
+              <p className="text-sm text-muted" role="status">Checking resume status…</p>
+            ) : studentProfile.error ? (
+              <p className="field-error" role="alert">Could not check your resume status: {studentProfile.error}</p>
+            ) : !studentProfile.data?.hasResume ? (
+              <p className="text-sm text-muted">
+                Upload a resume from <Link to="/student/profile">your profile</Link> to see job-specific insights.
+              </p>
+            ) : matchError ? (
+              <div role="alert">
+                <p className="field-error" style={{ marginBottom: 'var(--sp-3)' }}>{matchError}</p>
+                <button className="btn btn-ghost btn-sm" type="button" onClick={handleJobMatch} disabled={matchLoading}>
+                  Try again
+                </button>
+              </div>
+            ) : matchLoading ? (
+              <p className="text-sm text-muted" role="status">Comparing your resume with this role…</p>
+            ) : matchResult?.jobId === id ? (
+              <div className="resume-insights">
+                <p className="text-strong">{matchResult.overallAssessment}</p>
+                <p className="text-sm text-muted">{matchResult.overallSummary}</p>
+                <InsightList title="Relevant strengths" items={matchResult.relevantStrengths} />
+                <InsightList title="Requirements not demonstrated" items={matchResult.requirementsNotDemonstrated} />
+                <InsightList title="Suggestions" items={matchResult.improvementSuggestions} />
+              </div>
+            ) : (
+              <p className="text-sm text-muted">Request an analysis to see your match insights.</p>
+            )}
+          </div>
+        </section>
+      )}
     </Shell>
+  );
+}
+
+function InsightList({ title, items }: { title: string; items: string[] }) {
+  if (items.length === 0) return null;
+  return (
+    <div>
+      <h3 className="text-sm text-strong" style={{ marginBottom: 'var(--sp-2)' }}>{title}</h3>
+      <ul className="resume-insight-list">
+        {items.map((item, index) => <li key={`${title}-${index}`}>{item}</li>)}
+      </ul>
+    </div>
   );
 }
 

@@ -25,7 +25,7 @@ export function PublicNavbar() {
           <NavLink to="/#features" onClick={close}>
             Features
           </NavLink>
-          <Link to="/jobs" onClick={close}>
+          <Link to="/jobs" className="public-nav-jobs" onClick={close}>
             Jobs
           </Link>
           <NavLink to="/#how-it-works" onClick={close}>

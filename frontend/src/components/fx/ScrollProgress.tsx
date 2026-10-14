@@ -19,26 +19,38 @@ export function ScrollProgress() {
     const flush = () => {
       pending = false;
       const doc = document.documentElement;
-      const scrollable = doc.scrollHeight - window.innerHeight;
-      const fraction = scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0;
+      raf = 0;
+      const scrollingElement = document.scrollingElement ?? doc;
+      const maxScroll = Math.max(0, scrollingElement.scrollHeight - scrollingElement.clientHeight);
+      const fraction = maxScroll > 0
+        ? Math.min(1, Math.max(0, window.scrollY / maxScroll))
+        : 1;
       el.style.transform = `scaleX(${fraction})`;
       el.style.opacity = fraction > 0.005 ? '1' : '0';
     };
 
-    const onScroll = () => {
+    const scheduleUpdate = () => {
       if (!pending) {
         pending = true;
         raf = requestAnimationFrame(flush);
       }
     };
 
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
+    window.addEventListener('scroll', scheduleUpdate, { passive: true });
+    window.addEventListener('resize', scheduleUpdate, { passive: true });
+
+    const resizeObserver = typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(scheduleUpdate)
+      : null;
+    resizeObserver?.observe(document.documentElement);
+    if (document.body) resizeObserver?.observe(document.body);
+
     flush();
 
     return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
+      window.removeEventListener('scroll', scheduleUpdate);
+      window.removeEventListener('resize', scheduleUpdate);
+      resizeObserver?.disconnect();
       cancelAnimationFrame(raf);
     };
   }, []);

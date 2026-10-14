@@ -52,6 +52,29 @@ function extractMessage(data: unknown, fallback: string): string {
   return fallback;
 }
 
+function isAiAnalysisRequest(url: string | undefined): boolean {
+  return Boolean(url && (url.includes('/ai/resume-analysis') || url.includes('/ai/job-match/')));
+}
+
+function aiHttpFallback(status: number, responseMessage: string): string {
+  if (responseMessage && responseMessage !== 'An unexpected error occurred') {
+    return responseMessage;
+  }
+  if (status === 401 || status === 403) {
+    return 'You must be signed in with a student account to request this AI analysis.';
+  }
+  if (status === 502) {
+    return 'The AI provider could not complete the request. Please try again later.';
+  }
+  if (status === 503 || status === 429) {
+    return 'The AI provider is temporarily busy. Please try again later.';
+  }
+  if (status >= 500) {
+    return 'The AI analysis could not be completed by the service. Please try again later.';
+  }
+  return `The AI analysis request failed (HTTP ${status}). Please review the request and try again.`;
+}
+
 // export const http = axios.create({
 //   baseURL: '/api',
 //   headers: { 'Content-Type': 'application/json' },
@@ -79,15 +102,23 @@ http.interceptors.response.use(
   (error: unknown) => {
     if (axios.isAxiosError(error)) {
       const status = error.response?.status ?? 0;
+      const isAiRequest = isAiAnalysisRequest(error.config?.url);
+      const isTimeout = error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT';
       if (status === 401 && typeof window !== 'undefined') {
         window.dispatchEvent(new Event(UNAUTHORIZED_EVENT));
       }
-      const fallback =
-        status === 0
+      const responseMessage = extractMessage(error.response?.data, '');
+      const fallback = isAiRequest
+        ? status === 0
+          ? isTimeout
+            ? 'AI analysis timed out while waiting for a response. Please try again.'
+            : 'Could not connect to the AI analysis service. Check your connection and try again.'
+          : aiHttpFallback(status, responseMessage)
+        : status === 0
           ? 'Network error — is the backend running?'
           : `Request failed (${status})`;
       return Promise.reject(
-        new ApiError(status, extractMessage(error.response?.data, fallback)),
+        new ApiError(status, isAiRequest && status !== 0 ? fallback : extractMessage(error.response?.data, fallback)),
       );
     }
     return Promise.reject(new ApiError(0, 'Unexpected error'));
